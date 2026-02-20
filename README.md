@@ -255,6 +255,17 @@ The agent (or model) that implements should not be the only one that reviews. Th
 
 dotplan doesn't prescribe *which* models or tools to use — that's project-level preference. But it does prescribe that implementation and review are separate steps, ideally done by separate models.
 
+### Model roles are harness config, not project state
+
+dotplan prescribes *roles* — implementation, review, spec writing — but not which models fill them. That's deliberate. Model preferences depend on your setup, budget, and which models are good *this month*. They change faster than your workflow.
+
+Where to configure model roles:
+- **Agent harness global context** — if your orchestrator loads a system prompt or memory (e.g., `CLAUDE.md` at `~/.claude/`, Cursor settings, or a custom agent's long-term memory), define your default model assignments there. This is the most common approach.
+- **Project agent instruction file** — if a specific project needs different model assignments (e.g., a Rust project where you want a model with stronger systems programming for implementation), override in that project's `CLAUDE.md`/`AGENTS.md`.
+- `.planning/` is the wrong place. Model config is not project state.
+
+The only strong opinion: implementation and review should be done by different models (or at least different sessions). Everything else — which model writes specs, which runs verification, whether you use subagents or inline — is yours to decide.
+
 ### Documentation is part of the task
 
 The "Docs to update" field in task specs makes documentation structural, not aspirational. The implementing agent updates docs as part of the task because the spec told it to, not because it remembered to. Docs that aren't specified in the task don't get written.
