@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="dotplan.svg" alt="dotplan — project memory for AI agents" width="100%">
+</p>
+
 # dotplan
 
 An opinionated workflow for AI coding agents. Zero install, git-native, agent-agnostic.
