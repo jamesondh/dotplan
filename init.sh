@@ -48,7 +48,7 @@ Phase 1: Initial setup — not started
 None
 
 ## Next Steps
-- Add dotplan instructions to agent instruction file (CLAUDE.md, .cursorrules, etc.)
+- Add dotplan instructions to agent instruction file (CLAUDE.md, AGENTS.md, .cursorrules, etc.)
 - Plan initial phases in ROADMAP.md
 - Write first phase spec in phases/01-{name}/SPEC.md
 TEMPLATE
@@ -86,6 +86,6 @@ echo "  phases/           — per-phase specs and summaries"
 echo "  _deferred/        — parked ideas"
 echo ""
 echo "Next:"
-echo "  1. Add dotplan instructions to your agent file (CLAUDE.md, .cursorrules, etc.)"
+echo "  1. Add dotplan instructions to your agent file (CLAUDE.md, AGENTS.md, .cursorrules, etc.)"
 echo "     See: https://github.com/jamesondh/dotplan/blob/main/templates/AGENT-INSTRUCTIONS.md"
 echo "  2. Plan your first phase in ROADMAP.md"

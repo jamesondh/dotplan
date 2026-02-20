@@ -1,7 +1,7 @@
 # Agent Instructions — dotplan
 
 Add the following to your project's agent instruction file
-(`CLAUDE.md`, `.cursorrules`, `codex.md`, `agents.md`, etc.)
+(`CLAUDE.md`, `AGENTS.md`, `.cursorrules`, etc.)
 alongside your existing project description, stack, and conventions:
 
 ---

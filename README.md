@@ -35,7 +35,7 @@ Then add to `.gitattributes` so GitHub collapses planning files in PR diffs and 
 .planning/** linguist-generated
 ```
 
-Then add dotplan instructions to your project's agent instruction file (`CLAUDE.md`, `.cursorrules`, `codex.md`, etc.) — see [Agent Instructions](#agent-instructions).
+Then add dotplan instructions to your project's agent instruction file (`CLAUDE.md`, `AGENTS.md`, `.cursorrules`, etc.) — see [Agent Instructions](#agent-instructions).
 
 Or use the init script to scaffold everything automatically:
 
@@ -45,9 +45,9 @@ curl -fsSL https://raw.githubusercontent.com/jamesondh/dotplan/main/init.sh | ba
 
 ## The Files
 
-### Your agent instruction file (CLAUDE.md, .cursorrules, codex.md, etc.)
+### Your agent instruction file (CLAUDE.md, AGENTS.md, etc.)
 
-dotplan doesn't create a separate project description file. You already have one — your agent instruction file. Every major AI coding tool has its own version: `CLAUDE.md` for Claude Code, `.cursorrules` for Cursor, `codex.md` for Codex, `agents.md` for custom setups, etc.
+dotplan doesn't create a separate project description file. You already have one — your agent instruction file. Every major AI coding tool has its own version: `CLAUDE.md` for Claude Code, `AGENTS.md` for Codex/OpenCode, `GEMINI.md` for Gemini CLI, `.cursorrules` for Cursor, etc.
 
 That file should already describe what you're building, the tech stack, constraints, and conventions. dotplan just asks you to add workflow instructions to it (see [Agent Instructions](#agent-instructions)). Static project context belongs there. `.planning/` is purely for dynamic state — where you are, where you're going, what happened.
 
@@ -271,13 +271,19 @@ Ideas that come up mid-phase but aren't urgent go in `_deferred/`. This prevents
 
 dotplan only works if your agent knows about it. Add the dotplan workflow instructions to whatever agent instruction file your project uses:
 
-| Tool | File |
-|------|------|
-| Claude Code | `CLAUDE.md` |
-| Cursor | `.cursorrules` |
-| Codex | `codex.md` |
-| Windsurf | `.windsurfrules` |
-| Custom / multi-agent | `agents.md` |
+| Tool | Primary file | Notes |
+|------|-------------|-------|
+| Claude Code | `CLAUDE.md` | Also searches `.claude/CLAUDE.md`, `.claude/rules/*.md` |
+| Codex CLI (OpenAI) | `AGENTS.md` | Also checks `AGENTS.override.md`; walks git root → cwd |
+| OpenCode | `AGENTS.md` | Falls back to `CLAUDE.md` if no `AGENTS.md` found |
+| Gemini CLI | `GEMINI.md` | Configurable via `settings.json` to also read `AGENTS.md` |
+| Cursor | `.cursor/rules/*.mdc` | `.cursorrules` still works but is deprecated |
+| Windsurf | `.windsurf/rules/*.md` | `.windsurfrules` still works but is legacy |
+| GitHub Copilot | `.github/copilot-instructions.md` | `AGENTS.md` support opt-in via settings |
+| Cline | `.clinerules` | Auto-detects `.cursorrules`, `.windsurfrules`, `AGENTS.md` too |
+| Aider | None (manual) | Use `--read CONVENTIONS.md` or configure in `.aider.conf.yml` |
+
+If you need a single file that works across the most tools with zero configuration, `AGENTS.md` at repo root has the broadest native support (Codex, OpenCode, plus opt-in for Copilot, Cline, and Gemini). For Claude Code specifically, you still need `CLAUDE.md`.
 
 A ready-to-use snippet is in [`templates/AGENT-INSTRUCTIONS.md`](templates/AGENT-INSTRUCTIONS.md). Copy it into your project's file alongside your existing project description, stack info, and conventions.
 
@@ -511,7 +517,7 @@ Entire occupies an interesting middle ground — it's a CLI with hooks, but it's
 You don't need to start a project with dotplan. To retrofit an existing codebase:
 
 1. Run `init.sh` (or create `.planning/` manually)
-2. Add the dotplan workflow instructions to your existing agent instruction file (`CLAUDE.md`, `.cursorrules`, etc.)
+2. Add the dotplan workflow instructions to your existing agent instruction file (`CLAUDE.md`, `AGENTS.md`, `.cursorrules`, etc.)
 3. In ROADMAP.md, list what's already been done as completed phases (brief, no need for full specs) and what's next
 4. Write STATE.md with the current situation — what you're working on, what's blocked, recent decisions
 5. Start the dotplan workflow from the *next* piece of work
