@@ -459,7 +459,9 @@ The biggest adoption barrier for any workflow is installation. dotplan has none.
 
 AI agents are good at implementing well-scoped tasks. They're not yet reliable at deciding what to build next, recognizing when a plan needs to change, or knowing when "done" actually means done. dotplan puts the human in the orchestration seat — you write specs, review output, decide when to defer or pivot, and manage the roadmap. The agent handles execution within those boundaries.
 
-This will change. Autonomous agents will get better at self-direction, and the orchestration role will shift from active steering to review and approval. But dotplan's conventions are designed so that a human can always read STATE.md and know exactly where things stand. That readability is valuable regardless of how autonomous the agents become — whether you're steering in real-time or reviewing after the fact.
+It's all but certain that autonomous agents will win out over human-steered agents. Human orchestration is a pragmatic choice given current model capabilities, not a philosophical one. The orchestration role will shift from active steering to review and approval — and eventually to exception handling.
+
+dotplan is designed to survive that transition. STATE.md is readable by humans and agents alike. The conventions (spec before code, separate review, compact state) don't assume a human is driving — they work whether you're steering an agent in a chat UI, reviewing PRs that an autonomous agent shipped, or building a pipeline where agents orchestrate other agents. The workflow stays the same; only who's running it changes.
 
 ### Context is the bottleneck, not intelligence
 
@@ -573,6 +575,15 @@ You don't need to start a project with dotplan. To retrofit an existing codebase
 5. Start the dotplan workflow from the *next* piece of work
 
 You don't need to retroactively create specs or summaries for past work. The value is forward-looking — giving your agent context about where things stand and a process for what comes next.
+
+## What's Next
+
+dotplan is a README, an init script, and templates. The core will stay simple — convention over tooling. But there are a few things on the horizon:
+
+- **Example repos** — real projects with `.planning/` at various stages (early, mid-project, 15+ phases), so people can see what the workflow looks like in practice rather than just reading about it.
+- **Project type conventions** — community-contributed patterns for different workflows: solo/main-branch, multi-branch with PRs, autonomous agent pipelines. The core spec stays the same; the conventions show how to apply it in different contexts.
+
+If you have a project using dotplan and want to share how it's working (or not), open an issue. The best improvements to the workflow have come from running into real problems on real projects.
 
 ## License
 
