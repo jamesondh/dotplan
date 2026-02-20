@@ -480,17 +480,31 @@ A task management system that parses PRDs into structured tasks with dependencie
 
 **Where dotplan differs:** Taskmaster is focused on task management — breaking down requirements and tracking what's done. dotplan is focused on session continuity and workflow — making sure the agent knows where things stand and follows a consistent process. Taskmaster doesn't have opinions about spec-before-code, implementation vs. review separation, or state compaction. You could use Taskmaster for task tracking and dotplan for workflow — they're not mutually exclusive.
 
+### [Entire](https://entire.io/) (Thomas Dohmke, ex-GitHub CEO)
+
+A git observability layer for AI agents. Entire captures the reasoning behind agent-generated code — prompts, transcripts, tool calls, files touched — and versions it alongside your commits on a separate branch (`entire/checkpoints/v1`). It's a CLI (`entire enable` in your repo) that hooks into Claude Code or Gemini CLI and runs in the background, creating "checkpoints" you can rewind to or resume from.
+
+The core thesis is "version-controlled reasoning": git tracks *what* changed but not *why*. As agents write more code than humans can review, the reasoning trace becomes more important than the diff. Entire captures that trace automatically.
+
+**Where Entire shines:** Traceability and audit — you get a full transcript of every agent session linked to its commit. Rewind/resume across sessions without reconstructing prompts. Onboarding (show the path from prompt → change → commit). Compliance use cases where you need to prove *why* code was written a certain way.
+
+**Where dotplan differs:** Different layers of the same problem. Entire answers "how did this code get written?" — it's backward-looking, capturing reasoning after the fact. dotplan answers "where are we and what's next?" — it's forward-looking, giving agents the context to continue work across sessions. Entire doesn't have opinions about workflow (spec before code, separate review, state compaction). dotplan doesn't capture reasoning traces or agent transcripts. They're complementary: Entire for the audit trail of *how*, dotplan for the working state of *what's happening now*.
+
+One key difference in philosophy: Entire requires a CLI install and hooks into specific agent runtimes (Claude Code, Gemini CLI). dotplan is just markdown files. Entire captures context automatically; dotplan requires agents to maintain state deliberately. The trade-off is automation vs. portability — Entire gives you richer data with less effort, dotplan works with any agent that can read files.
+
 ### The trade-off spectrum
 
 ```
 More automation                                          More portability
      ←───────────────────────────────────────────────→
-  GSD          Taskmaster        Beads           dotplan
-  (slash cmds, (MCP server,     (CLI + DB,      (just markdown,
-   subagents)   editor plugin)   git-backed)     zero install)
+  GSD          Taskmaster     Entire     Beads      dotplan
+  (slash cmds, (MCP server,  (CLI +     (CLI + DB, (just markdown,
+   subagents)   editor plugin) git hooks) git-backed) zero install)
 ```
 
 dotplan is the most portable and least automated. That's intentional — the bet is that the orchestration layer (which agent, which model, how to run it) changes faster than the workflow conventions (spec before code, compact state, review separately). By not encoding orchestration into the tool, dotplan avoids becoming coupled to any specific agent runtime.
+
+Entire occupies an interesting middle ground — it's a CLI with hooks, but it's lightweight and doesn't try to orchestrate your workflow. It augments git rather than replacing it. If you want both reasoning traces *and* structured workflow, using Entire + dotplan together makes sense.
 
 ## Adopting Mid-Project
 
