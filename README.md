@@ -309,7 +309,7 @@ dotplan works great solo. The value isn't collaboration overhead — it's sessio
 That's where dotplan really shines. Different agents (or different models) can read the same `.planning/` state and maintain continuity without sharing conversation history.
 
 **How does `.planning/` work with branches?**
-For solo devs on main, it just works — `.planning/` evolves with your code. For feature branches, each branch can have its own STATE.md reflecting that branch's work. Merge `.planning/` changes like any other file. If conflicts arise in STATE.md, take the version from the branch that's further along — STATE.md is always rewritable since the real history lives in STATE-archive.md and phase SUMMARYs.
+See [Working with Branches](#working-with-branches) below.
 
 **Does this replace GitHub Issues / Linear / Jira?**
 No. dotplan is for the agent's working context, not project management for humans. Use it alongside your normal issue tracker. Think of it as the agent's notebook, not the team's kanban board.
@@ -440,9 +440,11 @@ dotplan is built on a few beliefs about how agentic software development works �
 
 The biggest adoption barrier for any workflow is installation. dotplan has none. No CLI to install, no MCP server to configure, no API keys to set up, no package to keep updated. It's markdown files in a directory. Any agent that can read files can follow dotplan. This is a deliberate trade-off: you lose automation features (like dependency-aware task execution) but gain universality and zero maintenance burden.
 
-### The human is the orchestrator
+### The human is the orchestrator (for now)
 
-AI agents are good at implementing well-scoped tasks. They're bad at deciding what to build next, recognizing when a plan needs to change, and knowing when "done" actually means done. dotplan puts the human in the orchestration seat — you write specs, review output, decide when to defer or pivot, and manage the roadmap. The agent handles execution within those boundaries.
+AI agents are good at implementing well-scoped tasks. They're not yet reliable at deciding what to build next, recognizing when a plan needs to change, or knowing when "done" actually means done. dotplan puts the human in the orchestration seat — you write specs, review output, decide when to defer or pivot, and manage the roadmap. The agent handles execution within those boundaries.
+
+This will change. Autonomous agents will get better at self-direction, and the orchestration role will shift from active steering to review and approval. But dotplan's conventions are designed so that a human can always read STATE.md and know exactly where things stand. That readability is valuable regardless of how autonomous the agents become — whether you're steering in real-time or reviewing after the fact.
 
 ### Context is the bottleneck, not intelligence
 
@@ -511,6 +513,39 @@ More automation                                          More portability
 dotplan is the most portable and least automated. That's intentional — the bet is that the orchestration layer (which agent, which model, how to run it) changes faster than the workflow conventions (spec before code, compact state, review separately). By not encoding orchestration into the tool, dotplan avoids becoming coupled to any specific agent runtime.
 
 Entire occupies an interesting middle ground — it's a CLI with hooks, but it's lightweight and doesn't try to orchestrate your workflow. It augments git rather than replacing it. If you want both reasoning traces *and* structured workflow, using Entire + dotplan together makes sense.
+
+## Working with Branches
+
+dotplan's default workflow assumes a single developer working on a single branch — the most common setup for solo devs and side projects. But `.planning/` works naturally with branches because it's just files in git.
+
+### Branch-scoped state
+
+When you create a feature branch, you get your own copy of every `.planning/` file. No special configuration needed. STATE.md on your branch reflects your branch's work. ROADMAP.md on main stays the canonical plan.
+
+This means parallel branches can have divergent STATE.md files, each tracking their own phase progress. That's fine — STATE.md is meant to be branch-scoped context, not a global lock.
+
+### Merging `.planning/`
+
+When a feature branch merges back to main:
+
+| File | Merge strategy |
+|------|---------------|
+| **STATE.md** | Take the merging branch's version, then reconcile with main's current state. STATE.md is cheap to rewrite — the real history lives in summaries and archive. |
+| **STATE-archive.md** | Append-only, so conflicts are just ordering. Concatenate both sides. |
+| **ROADMAP.md** | Take main's version, then update with whatever the branch completed. |
+| **phases/** | Specs and summaries have unique names — they rarely conflict. |
+
+After merge, compact STATE.md on main: update it to reflect post-merge reality, archive what's done.
+
+### Multiple agents, multiple branches
+
+If you have multiple agents working in parallel (e.g., via git worktrees), each agent's branch has its own STATE.md. There's no shared mutable state to coordinate — git handles the isolation, and merge-time is when you reconcile.
+
+dotplan doesn't try to solve conflict detection between parallel agents (no tool has, reliably). Instead, it ensures that when branches do merge, the `.planning/` files are straightforward to reconcile because state is compact and history is append-only.
+
+### What dotplan doesn't do
+
+dotplan doesn't manage issue tracking, task delegation, or agent coordination. It's the agent's working notebook, not a project management layer. Use your existing issue tracker (GitHub Issues, Linear, Jira) for task assignment. Use dotplan for the agent's session-to-session context within whatever task it's been assigned.
 
 ## Adopting Mid-Project
 
