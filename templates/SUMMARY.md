@@ -15,5 +15,8 @@
 ## Decisions Made
 <!-- Architectural or design decisions that affect future work. -->
 
+## Follow-ups
+<!-- Deferred items, next-phase implications, things to revisit. "None" if clean. -->
+
 ## Metrics
 <!-- Test count, build status, performance — whatever's relevant. -->

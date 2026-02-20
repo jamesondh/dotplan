@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # dotplan init — scaffold .planning/ in your project
 # Usage: curl -fsSL https://raw.githubusercontent.com/jamesondh/dotplan/main/init.sh | bash
 
@@ -9,16 +9,22 @@ if [ -d ".planning" ]; then
   exit 0
 fi
 
+if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  echo "dotplan: warning — not inside a git repository. Proceeding anyway."
+fi
+
 echo "dotplan: creating .planning/ structure..."
 
 mkdir -p .planning/phases
 mkdir -p .planning/_deferred
+touch .planning/phases/.gitkeep
+touch .planning/_deferred/.gitkeep
 
 # ROADMAP.md
 cat > .planning/ROADMAP.md << 'TEMPLATE'
 # Roadmap
 
-## Current
+## In Progress
 - [ ] **Phase 1: Initial setup**
 
 ## Planned
@@ -57,7 +63,7 @@ TEMPLATE
 
 # .gitattributes
 if [ -f ".gitattributes" ]; then
-  if ! grep -q '.planning/\*\*' .gitattributes 2>/dev/null; then
+  if ! grep -Fq '.planning/** linguist-generated' .gitattributes 2>/dev/null; then
     echo "" >> .gitattributes
     echo "# dotplan: hide planning files from PR diffs and language stats" >> .gitattributes
     echo ".planning/** linguist-generated" >> .gitattributes

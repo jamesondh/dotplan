@@ -3,6 +3,9 @@
 ## Goal
 <!-- What this phase accomplishes -->
 
+## Risk
+<!-- Low / Medium / High. Note migrations, auth changes, external APIs, infra. "Low" if straightforward. -->
+
 ## Tasks
 
 ### Task 1: {Description}
@@ -12,3 +15,11 @@
 - <!-- Step-by-step implementation notes -->
 **Verify:** <!-- Command to verify: npm test, go test ./..., etc. -->
 **Done when:** <!-- Concrete completion condition -->
+
+### Task 2: {Description}
+**Files:**
+**Docs to update:**
+**Steps:**
+-
+**Verify:**
+**Done when:**

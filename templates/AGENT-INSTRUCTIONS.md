@@ -11,10 +11,10 @@ alongside your existing project description, stack, and conventions:
 This project uses [dotplan](https://github.com/jamesondh/dotplan) for structured development.
 
 ### Session Start
-Before starting work, read `.planning/STATE.md` and `.planning/ROADMAP.md` to understand current project state.
+For non-trivial tasks, read `.planning/STATE.md` and `.planning/ROADMAP.md` to understand current project state. For simple changes (1-2 files, clear fix), just do it — no ceremony needed.
 
 ### Workflow
-- Assess task complexity: Simple (just do it), Medium (spec → implement → review), Complex (full phase workflow)
+- Assess task complexity first: Simple (just do it), Medium (spec → implement → review), Complex (full phase workflow)
 - For non-trivial changes, write a phase spec in `.planning/phases/NN-{name}/SPEC.md` before implementing
 - Every task spec includes a "Docs to update" field — treat doc updates as part of the task, not optional
 - After implementation, review changes (ideally with a different model/perspective than what implemented)

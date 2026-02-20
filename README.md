@@ -2,13 +2,11 @@
 
 An opinionated workflow for AI coding agents. Zero install, git-native, agent-agnostic.
 
-dotplan is a `.planning/` directory convention and a set of opinions about how AI agents should approach multi-phase development work. It gives agents structured context about your project and a defined workflow to follow — spec before code, separate implementation from review, compact state between sessions, treat documentation as part of the task.
-
-It's not a CLI tool or a framework. It's markdown files that travel with your repo and a methodology that any agent can follow.
+dotplan is a `.planning/` directory convention and a methodology that any agent can follow — spec before code, separate implementation from review, compact state between sessions, treat documentation as part of the task. It's not a CLI tool or a framework. It's markdown files that travel with your repo.
 
 ## Why
 
-AI coding agents are stateless. Every new session starts from zero — no memory of what was tried, what decisions were made, or where a multi-phase project left off. This leads to repeated mistakes, lost context, and the human becoming the bottleneck for continuity.
+You ask your agent to continue yesterday's refactor and it starts over from scratch — no memory of the 8 phases you already completed, the architectural decisions you made, or the bugs you already fixed. AI coding agents are stateless. Every new session starts from zero, and the human becomes the bottleneck for continuity.
 
 dotplan solves this with two things:
 
@@ -20,13 +18,7 @@ You can use the state management without the workflow opinions, but they work be
 
 ## Quick Start
 
-Run the init script to scaffold `.planning/` in your project:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/jamesondh/dotplan/main/init.sh | bash
-```
-
-Or do it manually — create a `.planning/` directory with these files:
+Create a `.planning/` directory in your project with these files:
 
 ```
 .planning/
@@ -37,13 +29,19 @@ Or do it manually — create a `.planning/` directory with these files:
   _deferred/          # parked ideas not on the roadmap yet
 ```
 
-Then add to `.gitattributes` to keep planning files out of PR diffs:
+Then add to `.gitattributes` so GitHub collapses planning files in PR diffs and excludes them from language stats:
 
 ```
 .planning/** linguist-generated
 ```
 
 Then add dotplan instructions to your project's agent instruction file (`CLAUDE.md`, `.cursorrules`, `codex.md`, etc.) — see [Agent Instructions](#agent-instructions).
+
+Or use the init script to scaffold everything automatically:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/jamesondh/dotplan/main/init.sh | bash
+```
 
 ## The Files
 
@@ -64,8 +62,8 @@ The phase plan. Updated as phases complete or new ones are discovered.
 - [x] Phase 1: Project scaffold
 - [x] Phase 2: Core pipeline
 
-## Current
-- [ ] **Phase 3: API integration** ← IN PROGRESS
+## In Progress
+- [ ] **Phase 3: API integration**
 
 ## Planned
 - [ ] Phase 4: Deployment & monitoring
@@ -121,6 +119,9 @@ The implementation plan for a phase. Written before work begins.
 ## Goal
 {What this phase accomplishes}
 
+## Risk
+{Low / Medium / High. Note migrations, auth changes, external APIs, infra.}
+
 ## Tasks
 
 ### Task 1: {Description}
@@ -158,6 +159,9 @@ Written after a phase completes. Records what actually happened vs. what was pla
 ## Decisions Made
 {Architectural or design decisions that affect future work}
 
+## Follow-ups
+{Deferred items, next-phase implications, things to revisit. "None" if clean.}
+
 ## Metrics
 {Test count, build status, performance numbers — whatever's relevant}
 ```
@@ -178,11 +182,11 @@ The first opinion: **not every task needs the full workflow.** Agents should ass
 
 | Level | Signals | Approach |
 |-------|---------|----------|
-| **Simple** | 1-2 files, clear change | Just do it. No `.planning/` needed. |
-| **Medium** | 3-5 files, single phase | Write a quick spec, implement, review. |
-| **Complex** | Multi-phase, 5+ files, architectural decisions | Full dotplan workflow. |
+| **Simple** | 1-2 files, clear change, no risk | Just do it. No `.planning/` needed. |
+| **Medium** | 3-5 files, single phase, limited risk | Write a quick spec, implement, review. |
+| **Complex** | Multi-phase, 5+ files, architectural decisions, or high-risk changes (auth, migrations, external APIs, infra) | Full dotplan workflow. |
 
-This prevents the trap of applying heavyweight process to a one-line fix, or winging a complex refactor without a plan.
+Risk matters more than file count. A one-file auth change can be higher risk than a ten-file UI refactor. When in doubt, err toward more structure.
 
 ### The Loop
 
@@ -195,7 +199,7 @@ This prevents the trap of applying heavyweight process to a one-line fix, or win
 1. **Spec** — Write `phases/NN-{name}/SPEC.md` with task breakdown. Every task lists files to modify *and* docs to update.
 2. **Implement** — Work through the tasks. Update STATE.md as you go.
 3. **Review** — Review the changes with a different model or tool than what implemented. This is the most important opinion in dotplan: the agent that writes code should not be the only one that evaluates it.
-4. **Wrap up** — Follow the phase wrap-up checklist. No exceptions.
+4. **Wrap up** — Follow the phase wrap-up checklist. If you skip a step, note why in the SUMMARY.
 
 ### Phase Wrap-up Checklist
 
@@ -232,7 +236,7 @@ This prevents the common failure mode where state files grow unbounded and crowd
 
 ## Opinions
 
-dotplan is opinionated. These aren't suggestions — they're the core of the workflow. You can disagree with any of them, but the system works best when you follow them.
+dotplan is opinionated. These are strong defaults, not suggestions. You can override any of them, but the system works best when you follow them — and if you skip one, note why in your SUMMARY.
 
 ### Spec before code
 
@@ -298,6 +302,9 @@ dotplan works great solo. The value isn't collaboration overhead — it's sessio
 **What if I'm using multiple agents?**
 That's where dotplan really shines. Different agents (or different models) can read the same `.planning/` state and maintain continuity without sharing conversation history.
 
+**How does `.planning/` work with branches?**
+For solo devs on main, it just works — `.planning/` evolves with your code. For feature branches, each branch can have its own STATE.md reflecting that branch's work. Merge `.planning/` changes like any other file. If conflicts arise in STATE.md, take the version from the branch that's further along — STATE.md is always rewritable since the real history lives in STATE-archive.md and phase SUMMARYs.
+
 **Does this replace GitHub Issues / Linear / Jira?**
 No. dotplan is for the agent's working context, not project management for humans. Use it alongside your normal issue tracker. Think of it as the agent's notebook, not the team's kanban board.
 
@@ -355,10 +362,8 @@ The project description and dotplan instructions live together — no separate f
 ## In Progress
 - [ ] **Phase 9: Multi-tenant isolation** — auth done, row-level security remaining
 
-## Spec Ready
-- [ ] Phase 13: Approval workflows
-
 ## Planned
+- [ ] Phase 13: Approval workflows
 - [ ] Webhook notifications
 - [ ] Audit log + SOC 2 evidence collection
 - [ ] Deploy to production (Fly.io + managed Postgres)
@@ -469,9 +474,9 @@ GSD was a direct inspiration for dotplan. The `.planning/` directory structure, 
 
 ### [Taskmaster](https://github.com/eyaltoledano/claude-task-master)
 
-An MCP-based task management system that parses PRDs into structured tasks with dependencies, subtasks, and complexity ratings. Designed primarily for Cursor, Windsurf, and similar editors.
+A task management system that parses PRDs into structured tasks with dependencies, subtasks, and complexity ratings. Started as an MCP server for Cursor/Windsurf but now supports Claude Code, Codex CLI, and other tools.
 
-**Where Taskmaster shines:** PRD → task breakdown is genuinely useful for greenfield projects. MCP integration means the agent can query tasks conversationally. Supports many AI providers.
+**Where Taskmaster shines:** PRD → task breakdown is genuinely useful for greenfield projects. MCP integration means the agent can query tasks conversationally. Supports many AI providers and editor integrations.
 
 **Where dotplan differs:** Taskmaster is focused on task management — breaking down requirements and tracking what's done. dotplan is focused on session continuity and workflow — making sure the agent knows where things stand and follows a consistent process. Taskmaster doesn't have opinions about spec-before-code, implementation vs. review separation, or state compaction. You could use Taskmaster for task tracking and dotplan for workflow — they're not mutually exclusive.
 
