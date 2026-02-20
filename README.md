@@ -186,9 +186,9 @@ The first opinion: **not every task needs the full workflow.** Agents should ass
 
 | Level | Signals | Approach |
 |-------|---------|----------|
-| **Simple** | 1-2 files, clear change, no risk | Just do it. No `.planning/` needed. |
-| **Medium** | 3-5 files, single phase, limited risk | Write a quick spec, implement, review. |
-| **Complex** | Multi-phase, 5+ files, architectural decisions, or high-risk changes (auth, migrations, external APIs, infra) | Full dotplan workflow. |
+| **Simple** | 1-2 files, clear change, no risk | Just do it. No spec, no `.planning/` updates needed. |
+| **Medium** | 3-5 files, single-phase, limited risk | Write a spec (`phases/NN-{name}/SPEC.md`), implement, review. Update STATE.md but skip the full wrap-up checklist — no SUMMARY.md or STATE-archive entry needed. |
+| **Complex** | Multi-phase, 5+ files, architectural decisions, or high-risk changes (auth, migrations, external APIs, infra) | Full dotplan workflow: spec each phase, review the spec, implement, review the implementation, write SUMMARY.md, compact STATE.md → STATE-archive.md, full wrap-up checklist. |
 
 Risk matters more than file count. A one-file auth change can be higher risk than a ten-file UI refactor. When in doubt, err toward more structure.
 
@@ -307,9 +307,10 @@ Or add the short version:
 ```
 This project uses the dotplan workflow for structured development.
 Before starting work, read `.planning/STATE.md` and `.planning/ROADMAP.md`
-to understand current project state. Follow the phase workflow described
-in `.planning/` for non-trivial changes. Keep STATE.md under 150 lines
-and compact at phase wrap-up.
+to understand current project state. For non-trivial changes, write a spec
+before implementing, review with a different model than what implemented,
+and follow the phase wrap-up checklist (SUMMARY, compact STATE, update
+ROADMAP, doc check). Keep STATE.md under 150 lines.
 ```
 
 ## FAQ

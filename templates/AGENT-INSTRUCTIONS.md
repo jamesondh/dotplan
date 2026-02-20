@@ -14,8 +14,11 @@ This project uses [dotplan](https://github.com/jamesondh/dotplan) for structured
 For non-trivial tasks, read `.planning/STATE.md` and `.planning/ROADMAP.md` to understand current project state. For simple changes (1-2 files, clear fix), just do it — no ceremony needed.
 
 ### Workflow
-- Assess task complexity first: Simple (just do it), Medium (spec → implement → review), Complex (full phase workflow)
-- For non-trivial changes, write a phase spec in `.planning/phases/NN-{name}/SPEC.md` before implementing
+- Assess task complexity first:
+  - **Simple** (1-2 files, no risk): just do it, no spec or `.planning/` updates needed
+  - **Medium** (3-5 files, single phase): write a spec, implement, review. Update STATE.md but skip SUMMARY and STATE-archive
+  - **Complex** (multi-phase, architectural decisions, high-risk): full workflow — spec each phase, review the spec, implement, review the implementation, SUMMARY, compact STATE → archive, full wrap-up checklist
+- For Medium and Complex: write a phase spec in `.planning/phases/NN-{name}/SPEC.md` before implementing
 - Every task spec includes a "Docs to update" field — treat doc updates as part of the task, not optional
 - After implementation, review changes (ideally with a different model/perspective than what implemented)
 
