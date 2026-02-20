@@ -521,11 +521,11 @@ One key difference in philosophy: Entire requires a CLI install and hooks into s
 ### The trade-off spectrum
 
 ```
-More automation                                          More portability
-     ←───────────────────────────────────────────────→
-  GSD          Taskmaster     Entire     Beads      dotplan
-  (slash cmds, (MCP server,  (CLI +     (CLI + DB, (just markdown,
-   subagents)   editor plugin) git hooks) git-backed) zero install)
+More automation                                               More portability
+←────────────────────────────────────────────────────────────────────────────→
+  GSD            Taskmaster       Entire       Beads         dotplan
+  (slash cmds,   (MCP server,     (CLI +       (CLI + DB,    (just markdown,
+  subagents)     editor plugin)   git hooks)   git-backed)   zero install)
 ```
 
 dotplan is the most portable and least automated. That's intentional — the bet is that the orchestration layer (which agent, which model, how to run it) changes faster than the workflow conventions (spec before code, compact state, review separately). By not encoding orchestration into the tool, dotplan avoids becoming coupled to any specific agent runtime.
