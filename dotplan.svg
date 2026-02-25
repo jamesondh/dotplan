@@ -70,14 +70,14 @@
     <text x="148" y="331" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'DejaVu Sans Mono', 'Courier New', monospace" font-size="18" fill="#D8E1FF">ROADMAP.md</text>
     <text x="360" y="331" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'DejaVu Sans Mono', 'Courier New', monospace" font-size="16" fill="#9AA7C7">phase plan</text>
 
-    <text x="148" y="369" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'DejaVu Sans Mono', 'Courier New', monospace" font-size="18" fill="#D8E1FF">STATE-archive.md</text>
-    <text x="360" y="369" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'DejaVu Sans Mono', 'Courier New', monospace" font-size="16" fill="#9AA7C7">completed history</text>
+    <text x="148" y="369" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'DejaVu Sans Mono', 'Courier New', monospace" font-size="18" fill="#D8E1FF">phases/</text>
+    <text x="360" y="369" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'DejaVu Sans Mono', 'Courier New', monospace" font-size="16" fill="#9AA7C7">phase specs</text>
 
-    <text x="148" y="407" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'DejaVu Sans Mono', 'Courier New', monospace" font-size="18" fill="#D8E1FF">phases/</text>
-    <text x="360" y="407" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'DejaVu Sans Mono', 'Courier New', monospace" font-size="16" fill="#9AA7C7">specs &amp; summaries</text>
+    <text x="148" y="407" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'DejaVu Sans Mono', 'Courier New', monospace" font-size="18" fill="#D8E1FF">_deferred/</text>
+    <text x="360" y="407" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'DejaVu Sans Mono', 'Courier New', monospace" font-size="16" fill="#9AA7C7">parked ideas</text>
 
-    <text x="148" y="445" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'DejaVu Sans Mono', 'Courier New', monospace" font-size="18" fill="#D8E1FF">_deferred/</text>
-    <text x="360" y="445" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'DejaVu Sans Mono', 'Courier New', monospace" font-size="16" fill="#9AA7C7">parked ideas</text>
+    <text x="148" y="445" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'DejaVu Sans Mono', 'Courier New', monospace" font-size="18" fill="#D8E1FF">.gitattributes</text>
+    <text x="360" y="445" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'DejaVu Sans Mono', 'Courier New', monospace" font-size="16" fill="#9AA7C7">linguist-generated</text>
   </g>
 
   <!-- Divider -->

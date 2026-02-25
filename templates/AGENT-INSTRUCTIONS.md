@@ -1,37 +1,14 @@
-# Agent Instructions — dotplan
+# Agent Workflow Instructions
 
-Add the following to your project's agent instruction file
-(`CLAUDE.md`, `AGENTS.md`, `.cursorrules`, etc.)
-alongside your existing project description, stack, and conventions:
-
----
+Add this to your project instruction file (`CLAUDE.md`, `AGENTS.md`, `.cursorrules`, etc.) alongside project context and conventions.
 
 ## Project Management
 
-This project uses [dotplan](https://github.com/jamesondh/dotplan) for structured development.
-
-### Session Start
-For non-trivial tasks, read `.planning/STATE.md` and `.planning/ROADMAP.md` to understand current project state. For simple changes (1-2 files, clear fix), just do it — no ceremony needed.
-
-### Workflow
-- Assess task complexity first:
-  - **Simple** (1-2 files, no risk): just do it, no spec or `.planning/` updates needed
-  - **Medium** (3-5 files, single phase): write a spec, implement, review. Update STATE.md but skip SUMMARY and STATE-archive
-  - **Complex** (multi-phase, architectural decisions, high-risk): full workflow — spec each phase, review the spec, implement, review the implementation, SUMMARY, compact STATE → archive, full wrap-up checklist
-- For Medium and Complex: write a phase spec in `.planning/phases/NN-{name}/SPEC.md` before implementing
-- Every task spec includes a "Docs to update" field — treat doc updates as part of the task, not optional
-- After implementation, review changes (ideally with a different model/perspective than what implemented)
-
-### State Management
-- Update `.planning/STATE.md` as work progresses
-- Keep STATE.md under 150 lines — it's active context, not a history log
-- At phase wrap-up: move completed content to STATE-archive.md, update ROADMAP.md, write SUMMARY.md
-- Commit `.planning/` changes to git
-
-### Phase Wrap-up Checklist
-- [ ] Push all commits
-- [ ] Write phase SUMMARY.md
-- [ ] Compact STATE.md (move completed → STATE-archive.md)
-- [ ] Update ROADMAP.md
-- [ ] Doc check — were all "Docs to update" items addressed?
-- [ ] Commit .planning/ changes
+- For non-trivial work, start by reading `.planning/STATE.md` and `.planning/ROADMAP.md`.
+- For simple tasks (1-2 files, low risk), implement directly without planning ceremony.
+- For medium/high-risk work, write `.planning/phases/NN-{name}/SPEC.md` before coding.
+- In each task spec, include `Files`, `Docs to update`, `Verify`, and `Done when`.
+- After implementation, run verification. For medium/complex work, if no review was performed, ask: "Would you like me to review this with a subagent?"
+- At phase wrap-up, update `STATE.md` with a brief completion summary (key changes, verification, issues, follow-ups), then update `ROADMAP.md`.
+- Keep `STATE.md` under 150 lines and commit `.planning/` updates with code changes.
+- If `STATE.md` exceeds 150 lines, suggest the user compact it.

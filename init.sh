@@ -39,7 +39,7 @@ cat > .planning/STATE.md << 'TEMPLATE'
 # State
 
 <!-- Active working context. Keep under 150 lines. -->
-<!-- Move completed phases to STATE-archive.md at wrap-up. -->
+<!-- Keep only current work, blockers, and a brief recent-completed summary. -->
 
 ## Current Phase
 Phase 1: Initial setup — not started
@@ -48,17 +48,9 @@ Phase 1: Initial setup — not started
 None
 
 ## Next Steps
-- Add dotplan instructions to agent instruction file (CLAUDE.md, AGENTS.md, .cursorrules, etc.)
+- Add planning workflow instructions to agent instruction file (CLAUDE.md, AGENTS.md, .cursorrules, etc.)
 - Plan initial phases in ROADMAP.md
 - Write first phase spec in phases/01-{name}/SPEC.md
-TEMPLATE
-
-# STATE-archive.md
-cat > .planning/STATE-archive.md << 'TEMPLATE'
-# State Archive
-
-<!-- Append-only. Completed phase summaries go here during phase wrap-up. -->
-<!-- Read on demand, not every session. -->
 TEMPLATE
 
 # .gitattributes
@@ -81,11 +73,10 @@ echo ""
 echo "dotplan: initialized .planning/ with:"
 echo "  ROADMAP.md        — ordered phases with status"
 echo "  STATE.md          — active context (start here each session)"
-echo "  STATE-archive.md  — completed phase history"
-echo "  phases/           — per-phase specs and summaries"
+echo "  phases/           — per-phase specs"
 echo "  _deferred/        — parked ideas"
 echo ""
 echo "Next:"
-echo "  1. Add dotplan instructions to your agent file (CLAUDE.md, AGENTS.md, .cursorrules, etc.)"
+echo "  1. Add planning workflow instructions to your agent file (CLAUDE.md, AGENTS.md, .cursorrules, etc.)"
 echo "     See: https://github.com/jamesondh/dotplan/blob/main/templates/AGENT-INSTRUCTIONS.md"
 echo "  2. Plan your first phase in ROADMAP.md"

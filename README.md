@@ -28,8 +28,7 @@ Create a `.planning/` directory in your project with these files:
 .planning/
   ROADMAP.md          # ordered phases with status
   STATE.md            # active context (what's happening now)
-  STATE-archive.md    # completed phase history
-  phases/             # per-phase specs and summaries
+  phases/             # per-phase specs
   _deferred/          # parked ideas not on the roadmap yet
 ```
 
@@ -81,7 +80,7 @@ The phase plan. Updated as phases complete or new ones are discovered.
 
 The most important file. This is the bridge between sessions — it tells the agent exactly where things stand right now.
 
-**Keep it under 150 lines.** This is active context, not a history log. When a phase completes, move its content to STATE-archive.md.
+**Keep it under 150 lines.** This is active context, not a history log.
 
 What belongs in STATE.md:
 - Current phase and task-level status
@@ -91,13 +90,9 @@ What belongs in STATE.md:
 - Key metrics (test count, build status, whatever matters)
 
 What does NOT belong:
-- Full history of completed phases (→ STATE-archive.md)
-- Detailed verification results from past work (→ phase SUMMARY.md)
+- Full history of every past phase
+- Verbose logs that don't affect current work
 - Design rationale that doesn't affect current work (→ your agent instruction file)
-
-### STATE-archive.md
-
-Append-only log of completed phase summaries. The agent reads this on demand when it needs historical context, but it's not loaded every session. This is what keeps STATE.md lean.
 
 ### phases/
 
@@ -106,11 +101,9 @@ Each phase gets a numbered directory:
 ```
 phases/
   01-scaffold/
-    SPEC.md       # what to build, task breakdown
-    SUMMARY.md    # what actually happened (written after completion)
+    SPEC.md       # implementation plan
   02-core-api/
     SPEC.md
-    SUMMARY.md
 ```
 
 #### SPEC.md
@@ -141,34 +134,7 @@ The implementation plan for a phase. Written before work begins.
 
 The **"Docs to update"** field is intentional. Documentation should be part of the task, not an afterthought. If a task adds a feature, command, or config option, the spec says which docs to update. The implementing agent treats this as required, not optional.
 
-#### SUMMARY.md
-
-Written after a phase completes. Records what actually happened vs. what was planned.
-
-```markdown
-# Phase N: {Name} — Summary
-
-## Context
-{Why this phase, what triggered it}
-
-## Key Changes
-- What was implemented (focus on "what" and "why", not line-by-line)
-
-## Verification
-{What was tested and how}
-
-## Issues Found
-{Bugs, review findings, spec divergence. "None" if clean.}
-
-## Decisions Made
-{Architectural or design decisions that affect future work}
-
-## Follow-ups
-{Deferred items, next-phase implications, things to revisit. "None" if clean.}
-
-## Metrics
-{Test count, build status, performance numbers — whatever's relevant}
-```
+Phase completion results belong in `STATE.md` as a brief "recent completed" summary.
 
 ### _deferred/
 
@@ -187,8 +153,8 @@ The first opinion: **not every task needs the full workflow.** Agents should ass
 | Level | Signals | Approach |
 |-------|---------|----------|
 | **Simple** | 1-2 files, clear change, no risk | Just do it. No spec, no `.planning/` updates needed. |
-| **Medium** | 3-5 files, single-phase, limited risk | Write a spec (`phases/NN-{name}/SPEC.md`), implement, review. Update STATE.md but skip the full wrap-up checklist — no SUMMARY.md or STATE-archive entry needed. |
-| **Complex** | Multi-phase, 5+ files, architectural decisions, or high-risk changes (auth, migrations, external APIs, infra) | Full dotplan workflow: spec each phase, review the spec, implement, review the implementation, write SUMMARY.md, compact STATE.md → STATE-archive.md, full wrap-up checklist. |
+| **Medium** | 3-5 files, single-phase, limited risk | Write a spec (`phases/NN-{name}/SPEC.md`), implement, review, and update `STATE.md`. |
+| **Complex** | Multi-phase, 5+ files, architectural decisions, or high-risk changes (auth, migrations, external APIs, infra) | Full workflow: spec each phase, review the spec, implement, review the implementation, update `STATE.md` and `ROADMAP.md`, and run the wrap-up checklist. |
 
 Risk matters more than file count. A one-file auth change can be higher risk than a ten-file UI refactor. When in doubt, err toward more structure.
 
@@ -203,15 +169,15 @@ Risk matters more than file count. A one-file auth change can be higher risk tha
 1. **Spec** — Write `phases/NN-{name}/SPEC.md` with task breakdown. Every task lists files to modify *and* docs to update.
 2. **Implement** — Work through the tasks. Update STATE.md as you go.
 3. **Review** — Review the changes with a different model or tool than what implemented. This is the most important opinion in dotplan: the agent that writes code should not be the only one that evaluates it.
-4. **Wrap up** — Follow the phase wrap-up checklist. If you skip a step, note why in the SUMMARY.
+4. **Wrap up** — Follow the phase wrap-up checklist. If you skip a step, note why in `STATE.md`.
 
 ### Phase Wrap-up Checklist
 
 After every phase completion:
 
 - [ ] Push all commits
-- [ ] Write `phases/NN-{name}/SUMMARY.md`
-- [ ] Compact STATE.md — move completed phase to STATE-archive.md
+- [ ] Update `STATE.md` with a brief completion summary (key changes, verification, issues, follow-ups)
+- [ ] Compact STATE.md — keep only active context + a brief recent-completed summary
 - [ ] Update ROADMAP.md — mark phase complete, confirm next
 - [ ] Doc check — did all docs listed in task specs get updated?
 - [ ] Commit `.planning/` changes
@@ -224,7 +190,7 @@ When an agent picks up a project cold:
 1. Read the agent instruction file for stable project context (what, why, stack, conventions)
 2. Read ROADMAP.md for the big picture
 3. Read STATE.md for active context
-4. That's usually enough. If more history is needed, read STATE-archive.md or specific phase SUMMARYs.
+4. That's usually enough. If more history is needed, read prior phase `SPEC.md` files and relevant commits.
 
 STATE.md is the bridge. Keep it current and lean.
 
@@ -232,7 +198,7 @@ STATE.md is the bridge. Keep it current and lean.
 
 At phase wrap-up:
 
-1. Move the completed phase block from STATE.md → append to STATE-archive.md
+1. Keep a brief "recent completed" note in STATE.md (5-10 lines max)
 2. Keep only: current phase, last completed summary (brief), active decisions/blockers
 3. If STATE.md exceeds ~150 lines, aggressively trim
 
@@ -240,11 +206,11 @@ This prevents the common failure mode where state files grow unbounded and crowd
 
 ## Opinions
 
-dotplan is opinionated. These are strong defaults, not suggestions. You can override any of them, but the system works best when you follow them — and if you skip one, note why in your SUMMARY.
+dotplan is opinionated. These are strong defaults, not suggestions. You can override any of them, but the system works best when you follow them — and if you skip one, note why in `STATE.md`.
 
 ### Spec before code
 
-Every non-trivial phase starts with a written spec. This catches issues before implementation, gives reviewers something to check against, and creates a record of intent vs. outcome. Agents that jump straight to code produce more rework.
+Every non-trivial phase starts with a written spec. This catches issues before implementation, gives reviewers something to check against, and creates a record of intent vs. result. Agents that jump straight to code produce more rework.
 
 ### Separate implementation and review
 
@@ -272,7 +238,7 @@ The "Docs to update" field in task specs makes documentation structural, not asp
 
 ### State has a size budget
 
-STATE.md stays under 150 lines. Completed phases get compacted into STATE-archive.md. This isn't arbitrary — unbounded state files crowd out useful context in an agent's limited context window. The 800-line state file that worked great on Phase 3 becomes a liability by Phase 15.
+STATE.md stays under 150 lines. Keep only what the next session needs. This isn't arbitrary — unbounded state files crowd out useful context in an agent's limited context window. The 800-line state file that worked great on Phase 3 becomes a liability by Phase 15.
 
 ### Static content first, dynamic content last
 
@@ -305,12 +271,11 @@ A ready-to-use snippet is in [`templates/AGENT-INSTRUCTIONS.md`](templates/AGENT
 Or add the short version:
 
 ```
-This project uses the dotplan workflow for structured development.
-Before starting work, read `.planning/STATE.md` and `.planning/ROADMAP.md`
-to understand current project state. For non-trivial changes, write a spec
-before implementing, review with a different model than what implemented,
-and follow the phase wrap-up checklist (SUMMARY, compact STATE, update
-ROADMAP, doc check). Keep STATE.md under 150 lines.
+For non-trivial work, read `.planning/STATE.md` and `.planning/ROADMAP.md`.
+For medium/high-risk changes, write `phases/NN-{name}/SPEC.md` before coding.
+After implementation, run verification, review with a different model/session,
+update `STATE.md` with completion notes, then update `ROADMAP.md`.
+Keep `STATE.md` under 150 lines.
 ```
 
 ## FAQ
@@ -331,7 +296,7 @@ See [Working with Branches](#working-with-branches) below.
 No. dotplan is for the agent's working context, not project management for humans. Use it alongside your normal issue tracker. Think of it as the agent's notebook, not the team's kanban board.
 
 **What if a phase goes off-plan?**
-That's what SUMMARY.md is for. Record what actually happened vs. what was planned. Future phases can reference this to understand why things diverged.
+Record what happened in `STATE.md` in the recent-completed summary for that phase.
 
 **How is this different from just good commit messages?**
 Commit messages record what changed. dotplan records *where you are, where you're going, and why.* It's the difference between a changelog and a map.
@@ -425,28 +390,25 @@ policies on all tables, tenant-scoped S3 prefixes, test isolation.
 - Processing ~200 invoices/day in staging
 ```
 
-The full history of all completed phases lives in STATE-archive.md, not here. STATE.md is just what the agent needs to know *right now*.
+STATE.md is what the agent needs to know *right now*. Keep it focused on active context plus a brief recent-completed summary.
 
-### phases/ directory (specs and summaries accumulate over time)
+### phases/ directory (specs accumulate over time)
 
 ```
 phases/
   01-scaffold/
     SPEC.md
-    SUMMARY.md
   02-pdf-extraction/
     SPEC.md
-    SUMMARY.md
   ...
   09-multi-tenant/
-    SPEC.md        # (no SUMMARY yet — still in progress)
+    SPEC.md        # (still in progress)
   ...
   14-bulk-import/
     SPEC.md
-    SUMMARY.md
 ```
 
-Each SUMMARY.md records what actually happened — issues found during review, decisions made, how the implementation diverged from the spec. This is the project's institutional memory.
+Each phase `SPEC.md` records the plan and task structure. Keep implementation results in `STATE.md` so handoff context stays in one place.
 
 ## Principles
 
@@ -470,7 +432,7 @@ Most agent failures aren't because the model is dumb. They're because the model 
 
 ### Plans are wrong, planning is useful
 
-No spec survives implementation intact. That's fine. The value of writing a spec isn't prediction — it's forcing yourself to think through the tasks, identify which files change, and name what "done" looks like before writing code. SUMMARY.md exists specifically to record how reality diverged from the plan.
+No spec survives implementation intact. That's fine. The value of writing a spec isn't prediction — it's forcing yourself to think through the tasks, identify which files change, and name what "done" looks like before writing code. Then capture how reality diverged in the phase completion summary in `STATE.md`.
 
 ### Review is not optional
 
@@ -548,12 +510,11 @@ When a feature branch merges back to main:
 
 | File | Merge strategy |
 |------|---------------|
-| **STATE.md** | Take the merging branch's version, then reconcile with main's current state. STATE.md is cheap to rewrite — the real history lives in summaries and archive. |
-| **STATE-archive.md** | Append-only, so conflicts are just ordering. Concatenate both sides. |
+| **STATE.md** | Take the merging branch's version, then reconcile with main's current state. STATE.md is cheap to rewrite. |
 | **ROADMAP.md** | Take main's version, then update with whatever the branch completed. |
-| **phases/** | Specs and summaries have unique names — they rarely conflict. |
+| **phases/** | Specs have unique names — they rarely conflict. |
 
-After merge, compact STATE.md on main: update it to reflect post-merge reality, archive what's done.
+After merge, compact STATE.md on main: keep only post-merge active context and a brief recent-completed summary.
 
 ### Multiple agents, multiple branches
 
@@ -575,7 +536,7 @@ You don't need to start a project with dotplan. To retrofit an existing codebase
 4. Write STATE.md with the current situation — what you're working on, what's blocked, recent decisions
 5. Start the dotplan workflow from the *next* piece of work
 
-You don't need to retroactively create specs or summaries for past work. The value is forward-looking — giving your agent context about where things stand and a process for what comes next.
+You don't need to retroactively create specs for past work. The value is forward-looking — giving your agent context about where things stand and a process for what comes next.
 
 ## What's Next
 
