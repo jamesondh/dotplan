@@ -46,6 +46,12 @@ Or use the init script to scaffold everything automatically:
 curl -fsSL https://raw.githubusercontent.com/jamesondh/dotplan/main/init.sh | bash
 ```
 
+Or install as an [agent skill](https://skills.sh) so your AI coding agent knows the workflow automatically:
+
+```bash
+npx skills add jamesondh/dotplan
+```
+
 ## The Files
 
 ### Your agent instruction file (CLAUDE.md, AGENTS.md, etc.)
