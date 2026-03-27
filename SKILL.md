@@ -93,10 +93,15 @@ Write to `.planning/phases/NN-{name}/SPEC.md` before implementing medium/complex
 # Phase N: {Name}
 
 ## Goal
-{What this phase accomplishes}
+{What this phase accomplishes and WHY — the design decision, not just the task}
 
 ## Risk
 {Low / Medium / High. Note migrations, auth changes, external APIs, infra.}
+
+## Surface Area
+{Which parts of the codebase this phase touches — coordination metadata}
+Primarily: src/api/foo/
+Touches: src/shared/types.ts
 
 ## Tasks
 
@@ -107,9 +112,23 @@ Write to `.planning/phases/NN-{name}/SPEC.md` before implementing medium/complex
 - Step-by-step implementation notes
 **Verify:** npm test, go test ./..., etc.
 **Done when:** {Concrete completion condition}
+
+---
+
+## Postmortem
+### Deviations
+- {Filled in after implementation — what diverged from the plan and why}
+### Actual Surface Area
+- {What files actually changed vs. what was planned}
+### Lessons
+- {Anything worth carrying forward}
 ```
 
 The **"Docs to update"** field is intentional — documentation is part of the task, not an afterthought.
+
+The **Surface Area** section helps multiple humans/agents working in parallel spot potential conflicts before they become merge nightmares.
+
+The **Postmortem** section is filled in at phase wrap-up. It turns the spec from a planning artifact into a decision record — what you intended vs. what actually happened.
 
 ## The Workflow Loop
 
@@ -122,6 +141,7 @@ The **"Docs to update"** field is intentional — documentation is part of the t
 ### Phase Wrap-up Checklist
 
 - Push all commits
+- Fill in the **Postmortem** section in the phase's SPEC.md (deviations, actual surface area, lessons)
 - Update `STATE.md` with brief completion summary (key changes, verification, issues, follow-ups)
 - Compact STATE.md — keep only active context + brief recent-completed summary
 - Update `ROADMAP.md` — mark phase complete, confirm next

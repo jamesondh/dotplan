@@ -20,6 +20,24 @@ dotplan solves this with two things:
 
 You can use the state management without the workflow opinions, but they work best together.
 
+## Philosophy: Specs, Code, and the Gonzalez Problem
+
+Gabriella Gonzalez [argues](https://haskellforall.com/2026/03/a-sufficiently-detailed-spec-is-code) that a sufficiently detailed specification is just code — that as you make a spec precise enough for an agent to implement correctly, you converge on the same rigor as the implementation itself. She's channeling Dijkstra: the quest for natural language precision inevitably becomes formal notation.
+
+She's right — if your spec is trying to *replace* implementation. But that's not what dotplan specs are for.
+
+dotplan specs exist for **humans**, not agents. They document *what* and *why* at a level where:
+
+- A teammate can audit the design decision without reading the implementation
+- A reviewer can catch the wrong approach before 2000 lines exist
+- Future-you can understand why the codebase looks this way six months later
+
+The failure mode Gonzalez identifies — specs that become pseudocode with database schemas and algorithm details — is a real smell. It means the spec writer is trying to constrain the implementation instead of communicating intent. The more reliable agents become, the less detail specs need, because you're trusting the implementer (agent or human) to make reasonable choices within the stated goal.
+
+The Gonzalez problem is also why dotplan specs have a **postmortem section** (see [Phase Specs](#specmd)). The spec captures intent before implementation. The postmortem captures what actually happened after. Together, they form a complete decision record — and the postmortem is what prevents the spec from needing to be exhaustively detailed, because reality is recorded alongside the plan.
+
+Specs are for humans. Implementation details are for agents. The postmortem bridges the gap.
+
 ## Quick Start
 
 Create a `.planning/` directory in your project with these files:
@@ -114,16 +132,22 @@ phases/
 
 #### SPEC.md
 
-The implementation plan for a phase. Written before work begins.
+The implementation plan for a phase. Written before work begins, completed after implementation.
+
+A spec has two lives: **pre-implementation**, it's a planning and coordination artifact — the goal, the risk assessment, the surface area, the task breakdown. **Post-implementation**, the postmortem section turns it into a decision record — what actually happened, where reality diverged from the plan, and lessons learned.
 
 ```markdown
 # Phase N: {Name}
 
 ## Goal
-{What this phase accomplishes}
+{What this phase accomplishes and WHY — the design decision, not just the task}
 
 ## Risk
 {Low / Medium / High. Note migrations, auth changes, external APIs, infra.}
+
+## Surface Area
+Primarily: src/api/appeals/
+Touches: src/shared/types.ts, src/db/schema.ts
 
 ## Tasks
 
@@ -136,11 +160,27 @@ The implementation plan for a phase. Written before work begins.
 **Done when:** {Concrete completion condition}
 
 ### Task 2: ...
+
+---
+
+## Postmortem
+### Deviations
+- Deviated from spec on X because Y
+- Added Z which wasn't in the original spec
+### Actual Surface Area
+- src/api/appeals/ (as planned)
+- src/middleware/auth.ts (unplanned — needed for tenant scoping)
+### Lessons
+- The appeals API needed auth middleware we didn't anticipate
 ```
 
 The **"Docs to update"** field is intentional. Documentation should be part of the task, not an afterthought. If a task adds a feature, command, or config option, the spec says which docs to update. The implementing agent treats this as required, not optional.
 
-Phase completion results belong in `STATE.md` as a brief "recent completed" summary.
+The **Surface Area** section is coordination metadata — it tells teammates and agents which parts of the codebase this phase touches. When multiple people or agents are working in parallel, glancing at active specs' surface areas immediately reveals potential conflicts ("we're both touching `schema.ts`, let's coordinate"). The postmortem's **Actual Surface Area** captures where reality diverged.
+
+The **Postmortem** section is filled in after implementation (see [Philosophy](#philosophy-specs-code-and-the-gonzalez-problem)). It's intentionally lightweight — just the delta between plan and reality. An agent can draft it automatically by diffing the spec against the actual commits.
+
+Phase completion results also belong in `STATE.md` as a brief "recent completed" summary.
 
 ### _deferred/
 
@@ -182,6 +222,7 @@ Risk matters more than file count. A one-file auth change can be higher risk tha
 After every phase completion:
 
 - [ ] Push all commits
+- [ ] Fill in the **Postmortem** section in the phase's SPEC.md (deviations, actual surface area, lessons)
 - [ ] Update `STATE.md` with a brief completion summary (key changes, verification, issues, follow-ups)
 - [ ] Compact STATE.md — keep only active context + a brief recent-completed summary
 - [ ] Update ROADMAP.md — mark phase complete, confirm next
@@ -279,7 +320,9 @@ Or add the short version:
 ```
 For non-trivial work, read `.planning/STATE.md` and `.planning/ROADMAP.md`.
 For medium/high-risk changes, write `phases/NN-{name}/SPEC.md` before coding.
+Include a Surface Area section listing which parts of the codebase the phase touches.
 After implementation, run verification, review with a different model/session,
+fill in the spec's Postmortem section (deviations, actual surface area, lessons),
 update `STATE.md` with completion notes, then update `ROADMAP.md`.
 Keep `STATE.md` under 150 lines.
 ```
@@ -302,7 +345,10 @@ See [Working with Branches](#working-with-branches) below.
 No. dotplan is for the agent's working context, not project management for humans. Use it alongside your normal issue tracker. Think of it as the agent's notebook, not the team's kanban board.
 
 **What if a phase goes off-plan?**
-Record what happened in `STATE.md` in the recent-completed summary for that phase.
+Record what happened in the phase spec's Postmortem section — deviations, what changed and why, actual surface area vs. planned. A brief summary also goes in `STATE.md` for session continuity.
+
+**How do specs avoid becoming pseudocode?**
+See [Philosophy](#philosophy-specs-code-and-the-gonzalez-problem). Specs should document *what* and *why*, not *how*. If your spec reads like an implementation, you're micromanaging the agent. The task breakdown helps with parallelization and scoping, but the steps should be directional, not line-by-line instructions. The postmortem captures what actually happened, so the spec doesn't need to predict every detail.
 
 **How is this different from just good commit messages?**
 Commit messages record what changed. dotplan records *where you are, where you're going, and why.* It's the difference between a changelog and a map.
@@ -353,9 +399,11 @@ The project description and dotplan instructions live together — no separate f
 - [x] Phase 14: Bulk import + progress tracking
 
 ## In Progress
-- [ ] **Phase 9: Multi-tenant isolation** — auth done, row-level security remaining
+- [ ] **Phase 9: Multi-tenant isolation** — @alice — auth done, row-level security remaining
+- [ ] **Phase 15: Vendor portal** — @bob
 
 ## Planned
+- [ ] Phase 16: Integration reconciliation (merge point: 9 + 15)
 - [ ] Phase 13: Approval workflows
 - [ ] Webhook notifications
 - [ ] Audit log + SOC 2 evidence collection
@@ -366,7 +414,7 @@ The project description and dotplan instructions live together — no separate f
 - Mobile upload app — originally Phase 3, descoped (see `_deferred/mobile-app.md`)
 ```
 
-Notice the non-sequential numbering — Phase 3 was descoped, phases were added and reordered as the project evolved. That's normal. The roadmap reflects reality, not the original plan.
+Notice the non-sequential numbering — Phase 3 was descoped, phases were added and reordered as the project evolved. That's normal. The roadmap reflects reality, not the original plan. The `@owner` annotations and merge point (Phase 16) show how multiple developers coordinate without structural overhead.
 
 ### STATE.md (compact — well under the 150-line budget)
 
@@ -438,7 +486,7 @@ Most agent failures aren't because the model is dumb. They're because the model 
 
 ### Plans are wrong, planning is useful
 
-No spec survives implementation intact. That's fine. The value of writing a spec isn't prediction — it's forcing yourself to think through the tasks, identify which files change, and name what "done" looks like before writing code. Then capture how reality diverged in the phase completion summary in `STATE.md`.
+No spec survives implementation intact. That's fine. The value of writing a spec isn't prediction — it's forcing yourself to think through the tasks, identify which files change, and name what "done" looks like before writing code. Then capture how reality diverged in the spec's postmortem section — deviations, actual surface area, and lessons learned. The spec + postmortem together form a complete decision record: what you intended, and what actually happened.
 
 ### Review is not optional
 
@@ -482,7 +530,7 @@ The core thesis is "version-controlled reasoning": git tracks *what* changed but
 
 **Where Entire shines:** Traceability and audit — you get a full transcript of every agent session linked to its commit. Rewind/resume across sessions without reconstructing prompts. Onboarding (show the path from prompt → change → commit). Compliance use cases where you need to prove *why* code was written a certain way.
 
-**Where dotplan differs:** Different layers of the same problem. Entire answers "how did this code get written?" — it's backward-looking, capturing reasoning after the fact. dotplan answers "where are we and what's next?" — it's forward-looking, giving agents the context to continue work across sessions. Entire doesn't have opinions about workflow (spec before code, separate review, state compaction). dotplan doesn't capture reasoning traces or agent transcripts. They're complementary: Entire for the audit trail of *how*, dotplan for the working state of *what's happening now*.
+**Where dotplan differs:** Different layers of the same problem. Entire answers "how did this code get written?" — it's backward-looking, capturing reasoning after the fact. dotplan answers "where are we and what's next?" — it's forward-looking, giving agents the context to continue work across sessions. With postmortems, dotplan also captures some backward-looking context (what diverged from the plan), but at the decision level rather than the transcript level. Entire doesn't have opinions about workflow (spec before code, separate review, state compaction). dotplan doesn't capture reasoning traces or agent transcripts. They're complementary: Entire for the granular audit trail of *how*, dotplan for the decision-level record of *what and why*.
 
 One key difference in philosophy: Entire requires a CLI install and hooks into specific agent runtimes (Claude Code, Gemini CLI). dotplan is just markdown files. Entire captures context automatically; dotplan requires agents to maintain state deliberately. The trade-off is automation vs. portability — Entire gives you richer data with less effort, dotplan works with any agent that can read files.
 
@@ -532,6 +580,57 @@ dotplan doesn't try to solve conflict detection between parallel agents (no tool
 
 dotplan doesn't manage issue tracking, task delegation, or agent coordination. It's the agent's working notebook, not a project management layer. Use your existing issue tracker (GitHub Issues, Linear, Jira) for task assignment. Use dotplan for the agent's session-to-session context within whatever task it's been assigned.
 
+## Multi-Human, Multi-Agent Coordination
+
+dotplan's default workflow assumes a single developer. But as teams grow — especially teams where each human orchestrates multiple agents — the coordination problem changes. Here's how dotplan handles it without adding structural complexity.
+
+### The problem with structural solutions
+
+The obvious approach to multi-human coordination is structural: separate directories per workstream ("tracks"), nested state files, complex hierarchies. This fails in practice because agents struggle to navigate deep conventions, and every new directory is another thing for an agent to ignore or misunderstand. Structural complexity fights the "convention over tooling" principle.
+
+Instead, dotplan keeps the flat `.planning/` structure and adds lightweight conventions to existing files.
+
+### Ownership in ROADMAP.md
+
+Annotate phases with who's responsible:
+
+```markdown
+## In Progress
+- [ ] **Phase 9: Multi-tenant isolation** — @jameson
+- [ ] **Phase 10: Biopharma scraper** — @newhire
+
+## Planned
+- [ ] Phase 11: Integration + reconciliation (merge point: 9 + 10)
+```
+
+Phases are sequential *per owner*, not globally. Two people can work different phases simultaneously. The ROADMAP shows who's where at a glance.
+
+**Merge points** are phases where parallel work converges. Call them out explicitly so everyone knows when coordination is needed. The merge point phase gets its own SPEC.md describing what needs to reconcile.
+
+### Surface Area for conflict detection
+
+The `Surface Area` section in SPEC.md (see [Phase Specs](#specmd)) is the coordination primitive. When two active specs declare overlapping surface areas, that's a signal to coordinate — not a blocker, just a "heads up, we're both touching the schema."
+
+This replaces structural isolation (tracks, branches) with visibility. You don't prevent conflicts — you make them obvious before they happen.
+
+### Postmortems for async catch-up
+
+When your teammate finishes a phase while you're offline, you don't need to read their code or dig through Slack. Read their SPEC.md top to bottom: the goal tells you *what* and *why*, the tasks tell you *how it was planned*, and the postmortem tells you *what actually happened*. Full async context recovery in one file.
+
+This is particularly valuable when onboarding new team members. The `.planning/phases/` directory is a narrative history of the project's evolution — not just what was built, but why, and where plans met reality.
+
+### Scaling to agent swarms
+
+As the agent-to-human ratio grows (from 1:1 copilot to 1:many orchestration), the human role shifts from implementing to planning and reviewing. dotplan's spec-before-code philosophy is well-positioned for this — specs become the primary human artifact, everything downstream is agent-executed.
+
+At higher agent ratios:
+- Specs focus more on *what* and *why*, less on task decomposition (agents self-decompose)
+- Postmortems become more important as the audit trail for autonomous work
+- Surface area declarations prevent agent-vs-agent merge conflicts
+- STATE.md may shift from manually maintained to agent-maintained
+
+dotplan doesn't try to solve real-time collision detection between parallel agents — that's a tooling problem (git worktrees, merge queues). dotplan handles the coordination layer: who's working on what, where the overlaps are, and what happened.
+
 ## Adopting Mid-Project
 
 You don't need to start a project with dotplan. To retrofit an existing codebase:
@@ -549,7 +648,8 @@ You don't need to retroactively create specs for past work. The value is forward
 dotplan is a README, an init script, and templates. The core will stay simple — convention over tooling. But there are a few things on the horizon:
 
 - **Example repos** — real projects with `.planning/` at various stages (early, mid-project, 15+ phases), so people can see what the workflow looks like in practice rather than just reading about it.
-- **Project type conventions** — community-contributed patterns for different workflows: solo/main-branch, multi-branch with PRs, autonomous agent pipelines. The core spec stays the same; the conventions show how to apply it in different contexts.
+- **Project type conventions** — community-contributed patterns for different workflows: solo/main-branch, multi-branch with PRs, multi-human teams, autonomous agent pipelines. The core spec stays the same; the conventions show how to apply it in different contexts.
+- **Auto-generated postmortems** — tooling that diffs a phase spec against the actual commits and drafts the postmortem section automatically.
 
 If you have a project using dotplan and want to share how it's working (or not), open an issue. The best improvements to the workflow have come from running into real problems on real projects.
 
