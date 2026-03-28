@@ -18,6 +18,7 @@ If a project doesn't have a `.planning/` directory yet and needs one (non-trivia
   ROADMAP.md          # ordered phases with status
   STATE.md            # active context — what's happening now
   phases/             # per-phase specs
+  templates/SPEC.md   # spec template — copy when creating new phases
   _deferred/          # parked ideas not on the roadmap yet
 ```
 
@@ -66,8 +67,8 @@ Add this to the project's agent instruction file alongside existing project cont
 
 - For non-trivial work, start by reading `.planning/STATE.md` and `.planning/ROADMAP.md`.
 - For simple tasks (1-2 files, low risk), implement directly without planning ceremony.
-- For medium/high-risk work, write `.planning/phases/NN-{name}/SPEC.md` before coding.
-- In each task spec, include `Files`, `Docs to update`, `Verify`, and `Done when`.
+- For medium/high-risk work, copy `.planning/templates/SPEC.md` to `.planning/phases/NN-{name}/SPEC.md` and fill it in before coding.
+- Follow the template structure — every task must include `Files`, `Docs to update`, `Verify`, and `Done when`.
 - After implementation, run verification. For medium/complex work, if no review was performed, ask: "Would you like me to review this with a subagent?"
 - At phase wrap-up, update `STATE.md` with a brief completion summary (key changes, verification, issues, follow-ups), then update `ROADMAP.md`.
 - Keep `STATE.md` under 150 lines and commit `.planning/` updates with code changes.
@@ -133,7 +134,7 @@ The **Postmortem** section is filled in at phase wrap-up. It turns the spec from
 ## The Workflow Loop
 
 **Per phase:**
-1. **Spec** — Write `phases/NN-{name}/SPEC.md` with task breakdown.
+1. **Spec** — Copy `templates/SPEC.md` to `phases/NN-{name}/SPEC.md` and fill it in.
 2. **Implement** — Work through tasks. Update STATE.md as you go.
 3. **Review** — Review with a different model or session than implementation. The implementer is blind to their own choices.
 4. **Wrap up** — Follow the checklist below.

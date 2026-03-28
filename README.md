@@ -47,6 +47,7 @@ Create a `.planning/` directory in your project with these files:
   ROADMAP.md          # ordered phases with status
   STATE.md            # active context (what's happening now)
   phases/             # per-phase specs
+  templates/SPEC.md   # spec template (copy when creating new phases)
   _deferred/          # parked ideas not on the roadmap yet
 ```
 
@@ -319,7 +320,7 @@ Or add the short version:
 
 ```
 For non-trivial work, read `.planning/STATE.md` and `.planning/ROADMAP.md`.
-For medium/high-risk changes, write `phases/NN-{name}/SPEC.md` before coding.
+For medium/high-risk changes, copy `templates/SPEC.md` to `phases/NN-{name}/SPEC.md` and fill it in.
 Include a Surface Area section listing which parts of the codebase the phase touches.
 After implementation, run verification, review with a different model/session,
 fill in the spec's Postmortem section (deviations, actual surface area, lessons),
@@ -375,6 +376,7 @@ discrepancies, and pushes approved invoices to QuickBooks.
 ## Project Management
 This project uses dotplan for structured development.
 Before starting work, read `.planning/STATE.md` and `.planning/ROADMAP.md`.
+When creating a new phase spec, copy `.planning/templates/SPEC.md` as the starting point.
 Keep STATE.md under 150 lines. Compact at phase wrap-up.
 ```
 
@@ -449,6 +451,8 @@ STATE.md is what the agent needs to know *right now*. Keep it focused on active 
 ### phases/ directory (specs accumulate over time)
 
 ```
+templates/
+  SPEC.md              # spec template — copy when creating new phases
 phases/
   01-scaffold/
     SPEC.md
