@@ -133,7 +133,7 @@ phases/
 
 #### SPEC.md
 
-The implementation plan for a phase. Written before work begins, completed after implementation.
+The implementation plan for a phase. Written before work begins for low-reversibility changes, completed after implementation.
 
 A spec has two lives: **pre-implementation**, it's a planning and coordination artifact — the goal, the risk assessment, the surface area, the task breakdown. **Post-implementation**, the postmortem section turns it into a decision record — what actually happened, where reality diverged from the plan, and lessons learned.
 
@@ -193,17 +193,24 @@ When you're ready to work on a deferred idea, move it to `phases/NN-{name}/SPEC.
 
 dotplan isn't just file structure — it's an opinionated agent orchestration workflow. These opinions come from running multi-phase projects across hundreds of agent sessions and learning what breaks.
 
-### Complexity Assessment
+### Assessment: Scope and Reversibility
 
-The first opinion: **not every task needs the full workflow.** Agents should assess complexity before starting and calibrate ceremony accordingly.
+The first opinion: **not every task needs the full workflow.** Agents should assess two axes before starting: scope and reversibility.
 
-| Level | Signals | Approach |
-|-------|---------|----------|
-| **Simple** | 1-2 files, clear change, no risk | Just do it. No spec, no `.planning/` updates needed. |
-| **Medium** | 3-5 files, single-phase, limited risk | Write a spec (`phases/NN-{name}/SPEC.md`), implement, review, and update `STATE.md`. |
-| **Complex** | Multi-phase, 5+ files, architectural decisions, or high-risk changes (auth, migrations, external APIs, infra) | Full workflow: spec each phase, review the spec, implement, review the implementation, update `STATE.md` and `ROADMAP.md`, and run the wrap-up checklist. |
+**Scope** is how much work: file count, number of changes, whether it's single-phase or multi-phase.
 
-Risk matters more than file count. A one-file auth change can be higher risk than a ten-file UI refactor. When in doubt, err toward more structure.
+**Reversibility** is how costly it is to undo a bad decision. Low reversibility means the change creates state that's expensive to migrate away from — schema migrations, auth architecture, external API contracts, data model changes, choosing a third-party service. High reversibility means you can revert cleanly — UI changes, config tweaks, dependency swaps, refactors, anything where `git revert` is a viable escape hatch.
+
+Scope determines effort. Reversibility determines ceremony.
+
+| | Low reversibility | High reversibility |
+|---|---|---|
+| **Small scope** (1-2 files) | **Spec required** despite small size — a one-file auth change needs a plan | **Just do it** — no spec, no `.planning/` updates needed |
+| **Large scope** (3+ files, multi-phase) | **Full spec + review** — the full workflow | **Just do it** — commit history + STATE.md carry the record |
+
+When reversibility is low, write a spec before code regardless of scope. The spec catches bad decisions before they're committed to. When reversibility is high, the cost of a wrong choice is low enough that upfront planning is overhead — just do the work. Commit history and the STATE.md completion summary are sufficient record.
+
+When in doubt about reversibility, ask: "If this turns out wrong, can I revert it with git, or do I need a migration?" If the answer is migration, it's low reversibility.
 
 ### The Loop
 
@@ -212,11 +219,16 @@ Risk matters more than file count. A one-file auth change can be higher risk tha
 2. Draft ROADMAP.md with proposed phases
 3. Add `.gitattributes` entry
 
-**Per phase:**
+**Per phase (low reversibility):**
 1. **Spec** — Write `phases/NN-{name}/SPEC.md` with task breakdown. Every task lists files to modify *and* docs to update.
 2. **Implement** — Work through the tasks. Update STATE.md as you go.
 3. **Review** — Review the changes with a different model or tool than what implemented. This is the most important opinion in dotplan: the agent that writes code should not be the only one that evaluates it.
 4. **Wrap up** — Follow the phase wrap-up checklist. If you skip a step, note why in `STATE.md`.
+
+**Per phase (high reversibility):**
+1. **Implement** — Do the work. No upfront spec needed.
+2. **Review** — Still recommended for large scope, optional for small.
+3. **Wrap up** — Update `STATE.md` and `ROADMAP.md` as usual.
 
 ### Phase Wrap-up Checklist
 
@@ -256,9 +268,11 @@ This prevents the common failure mode where state files grow unbounded and crowd
 
 dotplan is opinionated. These are strong defaults, not suggestions. You can override any of them, but the system works best when you follow them — and if you skip one, note why in `STATE.md`.
 
-### Spec before code
+### Spec before code (when decisions are irreversible)
 
-Every non-trivial phase starts with a written spec. This catches issues before implementation, gives reviewers something to check against, and creates a record of intent vs. result. Agents that jump straight to code produce more rework.
+Every phase with low-reversibility decisions starts with a written spec. This catches issues before implementation, gives reviewers something to check against, and creates a record of intent vs. result. Agents that jump straight to code on irreversible changes produce more rework.
+
+For high-reversibility work, no spec is needed — commit history and the STATE.md completion summary are sufficient record. The upfront planning doesn't pay for itself when the worst case is a revert. See [Assessment: Scope and Reversibility](#assessment-scope-and-reversibility).
 
 ### Separate implementation and review
 
@@ -320,11 +334,13 @@ Or add the short version:
 
 ```
 For non-trivial work, read `.planning/STATE.md` and `.planning/ROADMAP.md`.
-For medium/high-risk changes, copy `templates/SPEC.md` to `phases/NN-{name}/SPEC.md` and fill it in.
+Assess reversibility: can this be reverted with git, or would it need a migration?
+Low reversibility (schema, auth, external APIs): write a SPEC before coding.
+High reversibility (UI, config, refactors): just do it — no spec needed.
+Copy `templates/SPEC.md` to `phases/NN-{name}/SPEC.md` for low-reversibility work.
 Include a Surface Area section listing which parts of the codebase the phase touches.
-After implementation, run verification, review with a different model/session,
-fill in the spec's Postmortem section (deviations, actual surface area, lessons),
-update `STATE.md` with completion notes, then update `ROADMAP.md`.
+After implementation, review with a different model/session for low-reversibility work.
+Update `STATE.md` with completion notes, then update `ROADMAP.md`.
 Keep `STATE.md` under 150 lines.
 ```
 
@@ -350,6 +366,9 @@ Record what happened in the phase spec's Postmortem section — deviations, what
 
 **How do specs avoid becoming pseudocode?**
 See [Philosophy](#philosophy-specs-code-and-the-gonzalez-problem). Specs should document *what* and *why*, not *how*. If your spec reads like an implementation, you're micromanaging the agent. The task breakdown helps with parallelization and scoping, but the steps should be directional, not line-by-line instructions. The postmortem captures what actually happened, so the spec doesn't need to predict every detail.
+
+**When do I need a spec?**
+When the decision is hard to reverse — schema changes, auth architecture, external API contracts, anything where getting it wrong means a migration. High-reversibility work (UI, refactors, dependency swaps) doesn't need a spec. When in doubt: "If this turns out wrong, can I revert it with git, or do I need a migration?"
 
 **How is this different from just good commit messages?**
 Commit messages record what changed. dotplan records *where you are, where you're going, and why.* It's the difference between a changelog and a map.
@@ -488,9 +507,11 @@ dotplan is designed to survive that transition. STATE.md is readable by humans a
 
 Most agent failures aren't because the model is dumb. They're because the model doesn't know what you already decided, what was tried and failed, or what the current state of the project is. dotplan treats context management as the primary problem — bounded state files, explicit session recovery, static-first ordering for cache efficiency. The model is smart enough if you give it the right context.
 
-### Plans are wrong, planning is useful
+### Plans are wrong, planning is useful (for irreversible decisions)
 
 No spec survives implementation intact. That's fine. The value of writing a spec isn't prediction — it's forcing yourself to think through the tasks, identify which files change, and name what "done" looks like before writing code. Then capture how reality diverged in the spec's postmortem section — deviations, actual surface area, and lessons learned. The spec + postmortem together form a complete decision record: what you intended, and what actually happened.
+
+For reversible decisions, the planning overhead doesn't pay for itself — a post-implementation record captures the same audit trail at lower cost. The principle isn't "always plan" — it's "plan when the cost of being wrong is high."
 
 ### Review is not optional
 

@@ -5,10 +5,11 @@ Add this to your project instruction file (`CLAUDE.md`, `AGENTS.md`, `.cursorrul
 ## Project Management
 
 - For non-trivial work, start by reading `.planning/STATE.md` and `.planning/ROADMAP.md`.
-- For simple tasks (1-2 files, low risk), implement directly without planning ceremony.
-- For medium/high-risk work, copy `.planning/templates/SPEC.md` to `.planning/phases/NN-{name}/SPEC.md` and fill it in before coding.
-- Follow the template structure — every section matters, especially `Surface Area`, `Files`, `Docs to update`, `Verify`, and `Done when`.
-- After implementation, run verification. For medium/complex work, if no review was performed, ask: "Would you like me to review this with a subagent?"
-- At phase wrap-up: fill in the spec's `Postmortem` section (deviations from plan, actual surface area, lessons), update `STATE.md` with a brief completion summary, then update `ROADMAP.md`.
+- Assess **reversibility** before starting: can this be reverted with git, or would it need a migration?
+  - **Low reversibility** (schema changes, auth, external APIs, data models): write a SPEC before coding. Copy `.planning/templates/SPEC.md` to `.planning/phases/NN-{name}/SPEC.md`.
+  - **High reversibility** (UI, config, refactors, dependency swaps): just do it — no spec needed. Commit history and STATE.md carry the record.
+- Follow the template structure — every SPEC task must include `Files`, `Docs to update`, `Verify`, and `Done when`.
+- After implementation, run verification. For low-reversibility work, review with a different model/session.
+- At phase wrap-up: fill in the SPEC's `Postmortem` section, update `STATE.md` with a brief completion summary, then update `ROADMAP.md`.
 - Keep `STATE.md` under 150 lines and commit `.planning/` updates with code changes.
 - If `STATE.md` exceeds 150 lines, suggest the user compact it.

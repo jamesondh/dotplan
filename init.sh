@@ -30,6 +30,7 @@ cat > .planning/templates/SPEC.md << 'TEMPLATE'
 
 ## Risk
 <!-- Low / Medium / High. Note migrations, auth changes, external APIs, infra. "Low" if straightforward. -->
+<!-- Why this phase needs a spec: {what makes it irreversible — schema migration, auth architecture, external API contract, etc.} -->
 
 ## Surface Area
 <!-- Which parts of the codebase this phase touches. Coordination metadata for multi-human/multi-agent work. -->
