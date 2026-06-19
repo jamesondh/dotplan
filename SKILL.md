@@ -152,7 +152,7 @@ The **Postmortem** section is filled in at phase wrap-up. It turns the spec from
 - Push all commits
 - Fill in the **Postmortem** section in the phase's SPEC.md (deviations, actual surface area, lessons)
 - Update `STATE.md` with brief completion summary (key changes, verification, issues, follow-ups)
-- Compact STATE.md — keep only active context + brief recent-completed summary
+- Compact STATE.md — keep only active context + brief recent-completed summary (see *Compacting STATE.md & ROADMAP.md* below for the full discipline when a deeper pass is warranted)
 - Update `ROADMAP.md` — mark phase complete, confirm next
 - Doc check — did all docs listed in task specs get updated?
 - Commit `.planning/` changes
@@ -175,6 +175,66 @@ STATE.md is the bridge between sessions. Keep it focused.
 - Full history of every past phase
 - Verbose logs
 - Design rationale that doesn't affect current work (that belongs in the agent instruction file)
+
+## Compacting STATE.md & ROADMAP.md
+
+These files are the *living* documents of the project. They accumulate bloat naturally: phase wrap-ups that ship and never get pruned, diagnostic logs from one-off investigations, frozen metric snapshots, multi-paragraph decision narratives whose outcome is now self-evident in code. Compaction is periodic surgery — not a continuous discipline.
+
+**When to compact:**
+- STATE.md exceeds 150 lines (hard signal)
+- ROADMAP.md has stale "Planned" items that never happened, or completed phases with verbose summaries that could collapse to one line
+- Between major phase boundaries, when prior wrap-ups have had time to become either useful or inert
+- Before a contributor handoff or a session where you want a clean cold-start read
+
+**The judgment heuristic:** *Can a contributor or agent reading this file in three months derive it from code, commit history, or phase SPECs?* If yes, prune or redirect. If no, keep. STATE.md and ROADMAP.md are optimized for the next reader, not as a context dumping ground.
+
+### Preserve hard (don't touch without explicit per-item review)
+
+- **Active Gotchas / sharp edges** that aren't obvious from reading code
+- **In-flight phase status** — anything tagged in-progress
+- **Methodology hashes, versioned contracts, schema invariants** — anything that needs to round-trip
+- **Cross-cutting invariants** — "all timestamps are UTC except in the display layer"
+- **Open questions / unresolved tensions** affecting future work
+- **Counter-intuitive decisions** — "this reads like a bug but it's intentional because…"
+- **Anything tagged with an explicit retention marker** — e.g. a line ending `[KEEP]` or a section under `### Pinned:`. Respect the convention if the project uses it.
+
+### Hard prune
+
+- Phase wrap-up summaries whose phases have completed any burn-in or watch window
+- Fixed Active Gotchas (delete, don't archive)
+- Frozen metric snapshots — "234/234 tests pass" belongs in a daily note, not STATE.md
+- File-modification lists that git history already tracks
+- Dated diagnostic logs from one-off investigations — compress to a one-line lesson or move to the relevant SPEC's Postmortem
+
+### Compress
+
+- Multi-paragraph decision narratives → outcome + one-line rationale
+- "We considered X, Y, Z and chose Y because…" → "Chose Y because Z"
+- Verbose investigation logs → one-line lesson
+- Lists of considered-but-rejected approaches → one line of "rejected: A (reason), B (reason)"
+
+### Redirect
+
+Anything fully covered by an existing phase SPEC gets a pointer (`see .planning/phases/24y/SPEC.md`) instead of a duplicate inline summary. STATE.md is not a synthesis of all SPECs; it's the running context for the *current* moment.
+
+### Inputs to consider before deciding
+
+1. The current STATE.md and ROADMAP.md
+2. `git log --oneline -n 200` — what shipped recently, what's still in flight
+3. The phase SPEC inventory (`.planning/phases/*/SPEC.md`) — what's covered there
+4. The project's agent instruction file (CLAUDE.md, AGENTS.md, etc.) — for project-specific load-bearing context the generic rules wouldn't know about
+5. When a candidate is genuinely ambiguous, ask. Don't hedge — ask.
+
+### Process
+
+Compaction is judgment-heavy and high-stakes — the cost of accidentally pruning load-bearing context is high. The safe shape:
+
+1. **Scan** STATE.md and ROADMAP.md against the inputs above.
+2. **Categorize** each candidate: Hard Prune / Compress / Redirect / Preserve.
+3. **Propose as a batch** with per-item reasoning and an explicit pointer to where the equivalent information will live afterward (commit hash, SPEC path, code location).
+4. **Apply after confirmation.** Do not silently rewrite either file.
+
+The output of a good compaction pass: a STATE.md a contributor can read cold and use, a ROADMAP.md whose Planned section reflects actual intent, and a measurable size reduction without losing anything that wasn't already recoverable from somewhere else.
 
 ## Session Recovery
 
