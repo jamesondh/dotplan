@@ -20,8 +20,9 @@ write those well and nothing else.
 ### 1. `AGENTS.md`: a map, the rules, and the checks
 
 One file at the repo root, read in full every session. `AGENTS.md` has the broadest native
-support across tools. For Claude Code, make `CLAUDE.md` a one-line stub that imports it (`@AGENTS.md`), so the two
-never drift apart.
+support across tools. Claude Code 2.1.277 and later reads `AGENTS.md` on its own when there's no `CLAUDE.md`. For older
+versions and SDK harnesses, make `CLAUDE.md` a one-line stub that imports it (`@AGENTS.md`), so the two never drift
+apart.
 
 It holds:
 
@@ -31,13 +32,25 @@ It holds:
 - **Rules:** invariants that are easy to break without noticing. Give each one its reason and a way to check it.
   The rules most worth writing down span several files: "every new table needs a line in the backup manifest, or
   it's silently left out of backups" is something no single file tells you.
-- **Checks by path:** a table of what to run when you touch what. An agent runs the checks it's told about and
-  misses the ones it would only find by reading old commits.
+- **Checks by path:** a table of the minimum to run when you touch what. An agent runs the checks it's told about
+  and misses the ones it would only find by reading old commits.
 
 **How long?** The fixed part is short; the rules take the room they need. Agents used what was in the file and
 missed much of what was only in older planning files, so a rule is cheaper here than anywhere else. Keep each rule to
 a line or two, group them under subheadings, and put explanation in the README or `docs/`. A few hundred lines of
-rules is fine; a few hundred lines of history or status isn't.
+rules is fine; a few hundred lines of history or status isn't. One hard limit: Codex reads at most 32 KiB of
+instruction files by default (`project_doc_max_bytes`), which is about 400 lines at a rule a line or two.
+
+In testing on three repos, the same snapshots with no instruction file scored 72% on the traps against 85% with
+one, and those sessions cost more: a quarter more tool calls and a fifth more tokens, spent finding things out that
+the file would have said.
+
+**Keep rules in the root file; don't scope them into nested `AGENTS.md` files.** Few rules worth writing down
+belong to one directory, since the ones that matter span several. And a nested file reaches the agent only in some
+setups. Claude Code loads it when the agent opens a file there with its Read tool, and not at all if a root
+`CLAUDE.md` exists. Codex loads only the files between the repo root and the directory it was launched in. In
+testing, recall on rules moved into nested files fell from 98% to 76% when the agent read files through the shell,
+and held when it used the Read tool. If the file outgrows the limit, move reference material out, not rules.
 
 **Checks come in three kinds:** a command, `manual: <what a person looks at>` for things only a human can judge,
 and `none` for rules no script can catch. A check that already fails at HEAD is listed with the commit that broke it.
@@ -51,7 +64,8 @@ agent can't misread.
 
 Agents already read history. In testing, fresh agents given a real repo and a task ran `git log -- <path>`,
 searched with `-S`, and opened the commit that did the same thing last time, without being asked. So the history is the project's memory,
-and its quality depends on how the commits were written.
+and its quality depends on how the commits were written. Since agents look there unprompted, the instruction file
+only needs to say when history matters, not to read it before every change.
 
 - **The subject is the index.** Name what changed and, if there was one, the trap, in the words a later search
   would use. In testing, one commit fixed a collision between two branches that had each bumped the protocol
@@ -98,17 +112,17 @@ done. The pattern that works:
 - **Status:** a table at the top of the folder's index. This is the only "state" dotplan asks you to keep, and it's
   scoped to one topic.
 
-Have hard-to-reverse work reviewed by a model from a different lineage than the one that wrote it. A reviewer that
-shares the author's blind spots doesn't find them; a different lab's model finds the most, and a fresh session of
-the same model is the minimum.
+Have hard-to-reverse work reviewed by a fresh session that didn't write it. A different model family helps when
+it's at least as capable as the author: in [one controlled study](https://arxiv.org/abs/2607.21656), review between
+two frontier models helped in one direction and hurt in the other, so capability matters more than lineage.
 
 ## The loop
 
-1. **Orient:** the README, `AGENTS.md`, `git status`, `git log -n 20`, then `git log -- <paths>` for what you'll
-   touch.
+1. **Orient:** the README, `AGENTS.md`, `git status`, `git log -n 20`. Go further back (`git log -- <paths>`,
+   `-S`, `blame`) when the change repeats, reverses or depends on something done before.
 2. **Decide the size:** most work goes straight to code. If it's hard to reverse, long, or needs measuring, start or
    update a `docs/<topic>/`.
-3. **Work, then run the checks** for the paths you touched.
+3. **Work, then run the checks** for the paths you touched, at least the ones the table lists.
 4. **Integrate:** after any merge, rebase or conflict resolution, run those checks again.
 5. **Commit** with a subject someone could search for and a body that says why.
 6. **Promote:** if something broke that nobody noticed, add the rule and its check to `AGENTS.md` in the same commit
@@ -137,7 +151,7 @@ lines to 116, its ROADMAP from 498 to 110), and were a tax on every session.
 | `_deferred/` | The tracker or `TODO.md` |
 | Agent instructions snippet | `AGENTS.md`: map, rules, checks by path |
 | Reversibility decides whether to spec | Unchanged |
-| Review with a different model | Unchanged, and a different lineage |
+| Review with a different model | A fresh session; a different family when it's as capable |
 
 ## Setup
 

@@ -20,18 +20,20 @@ There is no STATE.md or ROADMAP.md. State comes from git; open work lives in the
 
 1. Read the README and `AGENTS.md`.
 2. `git status`, `git log -n 20`.
-3. For each file you'll touch: `git log -- <path>`. Open (`git show`) any commit that did something similar before;
-   it's the template, and its body lists what it had to change together.
-4. Search history for the concepts involved: `git log -S<symbol>`, `git log --grep=<word>`.
+3. When the change repeats something done before (another endpoint, another map), reverses an earlier decision,
+   or touches code whose purpose isn't clear, look at its history: `git log -- <path>`, `git log -S<symbol>`,
+   `git log --grep=<word>`, `git blame`. Open (`git show`) the commit that did the same thing last time; it's the
+   template, and its body lists what it had to change together.
+4. Skip the archaeology for typos, mechanical renames and new, self-contained files.
 5. If the change is hard to reverse, long, or needs measuring, read or start `docs/<topic>/` first.
 
 ## While working
 
-- Run the checks in `AGENTS.md` for every path you touched. After a merge, rebase or conflict resolution, run them
+- Run the checks in `AGENTS.md` for every path you touched; they're the minimum. After a merge, rebase or conflict resolution, run them
   again.
 - Keep every fixed bug's reproduction as a test, script or fixture.
-- Hard-to-reverse work: ask for review from a model of a different lineage (a different lab's model is best, a fresh
-  session of the same model the minimum).
+- Hard-to-reverse work: have a fresh session review it, from a different model family when one at least as capable
+  is available.
 
 ## Committing
 
@@ -54,7 +56,8 @@ a script under `tools/` or `scripts/`) if one can be written. Add the check to t
 ## Setting up a repo
 
 Copy `templates/AGENTS.md` to the repo root (or run `init.sh`), write `CLAUDE.md` as `@AGENTS.md`, then fill in
-the map, the rules already known, and the checks already run. Keep the fixed part short; the rules take the room they need.
+the map, the rules already known, and the checks already run. Keep the fixed part short; the rules take the room they need, in the root file: nested `AGENTS.md` files load
+only in some harnesses and modes, so don't scope rules into them.
 
 ## Migrating from v1 (`.planning/`)
 
