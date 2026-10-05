@@ -1,86 +1,87 @@
+<p align="center">
+  <img src="dotplan.svg" alt="dotplan v2: one AGENTS.md, no ceremony" width="100%">
+</p>
+
 # dotplan
 
-A convention for repositories that AI agents work in. It has three parts: an instruction file of rules paired with
-the checks that enforce them, commit messages that carry the reasoning, and design docs for the few changes that
-earn one. There's nothing to install and no planning directory to maintain.
+dotplan is a short `AGENTS.md` template and a small set of habits for repos where coding agents work. It has three
+parts:
 
-> **v2 draft.** dotplan v1 was a `.planning/` directory (ROADMAP, STATE, per-phase specs). v2 removes it. See
-> [What changed](#what-changed-from-v1) for why and [Migrating](#migrating-from-v1) for how.
+1. **`AGENTS.md`**: a map of the repo, the rules that are easy to break, and the checks that find the breaks.
+2. **Commit messages** that record why each change was made.
+3. **Design docs** in `docs/<topic>/`, only for changes that are hard to reverse, long, or need measured targets.
 
-## The idea in one paragraph
+There is nothing to install and no planning directory to maintain.
 
-An agent that starts cold needs three things: where things are, what breaks without anyone noticing, and why the
-code looks the way it does. The first two belong in one file that's loaded every session, and the second is
-worth most when each rule comes with a command that checks it. The third already has a home that every tool can
-read, that stays current without upkeep, and that can be searched by file: the git history. dotplan v2 asks you to
-write those well and nothing else.
+## Why so little
 
-## The convention
+dotplan v1 (early 2026) was a `.planning/` directory with a roadmap, a state file, and a spec for each phase of
+work. The agents of that time often lost track of a project between sessions, and the files gave them a summary to
+start from.
 
-### 1. `AGENTS.md`: a map, the rules, and the checks
+Current agents do not need that summary. They read `git log` and the code, and they find the state of a project in
+seconds. Their result is often more accurate than a summary from the end of the last session. The v1 files also
+became longer with time and needed regular cleanup. With Opus 5.5, the v1 process made the work slower, not faster.
 
-One file at the repo root, read in full every session. `AGENTS.md` has the broadest native
-support across tools. Claude Code 2.1.277 and later reads `AGENTS.md` on its own when there's no `CLAUDE.md`. For older
-versions and SDK harnesses, make `CLAUDE.md` a one-line stub that imports it (`@AGENTS.md`), so the two never drift
-apart.
+An agent that starts a new session still needs three things: where the code is, what breaks without a visible
+error, and why the code is the way it is. `AGENTS.md` gives the first two. The git history gives the third. v2 asks
+you to write those two well, and nothing more. v1 is on the [`v1` branch](https://github.com/jamesondh/dotplan/tree/v1).
 
-It holds:
+## 1. `AGENTS.md`: map, rules, checks
 
-- **Working here:** the convention itself, six bullets ([template](templates/AGENTS.md)).
-- **A map:** where the important parts of the code live, one line each, 20 to 40 lines in all, including any
-  `docs/<topic>/` folders. It's for finding your way; explanation belongs in the README.
-- **Rules:** invariants that are easy to break without noticing. Give each one its reason and a way to check it.
-  The rules most worth writing down span several files: "every new table needs a line in the backup manifest, or
-  it's silently left out of backups" is something no single file tells you.
-- **Checks by path:** a table of the minimum to run when you touch what. An agent runs the checks it's told about
-  and misses the ones it would only find by reading old commits.
+Put one file at the repo root. The agent reads all of it at the start of each session. Most agent tools read
+`AGENTS.md` directly. Claude Code 2.1.277 and later reads it when there is no `CLAUDE.md`. For earlier versions and
+SDK harnesses, add a `CLAUDE.md` that contains only `@AGENTS.md`.
 
-**How long?** The fixed part is short; the rules take the room they need. Agents used what was in the file and
-missed much of what was only in older planning files, so a rule is cheaper here than anywhere else. Keep each rule to
-a line or two, group them under subheadings, and put explanation in the README or `docs/`. A few hundred lines of
-rules is fine; a few hundred lines of history or status isn't. One hard limit: Codex reads at most 32 KiB of
-instruction files by default (`project_doc_max_bytes`), which is about 400 lines at a rule a line or two.
+The file has four sections ([template](templates/AGENTS.md)):
 
-In testing on three repos, the same snapshots with no instruction file scored 72% on the traps against 85% with
-one, and those sessions cost more: a quarter more tool calls and a fifth more tokens, spent finding things out that
-the file would have said.
+- **Working here:** six rules for how to work. They are the same in every repo.
+- **Map:** where the important code is, one line for each item, 20 to 40 lines in total. Include each
+  `docs/<topic>/` folder. Explanation goes in the README.
+- **Rules:** things that a change can break without a visible error. Give each rule its reason and a check. The most
+  useful rules involve more than one file. Example: "Each new table needs a line in the backup manifest, or backups
+  do not include it." No single file tells you that.
+- **Checks:** a table of the minimum checks to run for each path. Agents run the checks that the file lists. They
+  often miss checks that are only in old commits.
 
-**Keep rules in the root file; don't scope them into nested `AGENTS.md` files.** Few rules worth writing down
-belong to one directory, since the ones that matter span several. And a nested file reaches the agent only in some
-setups. Claude Code loads it when the agent opens a file there with its Read tool, and not at all if a root
-`CLAUDE.md` exists. Codex loads only the files between the repo root and the directory it was launched in. In
-testing, recall on rules moved into nested files fell from 98% to 76% when the agent read files through the shell,
-and held when it used the Read tool. If the file outgrows the limit, move reference material out, not rules.
+A check is one of three types: a command, `manual: <what a person examines>`, or `none` if no script can find the
+problem. If a check already fails at HEAD, write the commit that broke it. If a check can touch production (for
+example, a test suite that reads `DATABASE_URL`), write how to run it safely.
 
-**Checks come in three kinds:** a command, `manual: <what a person looks at>` for things only a human can judge,
-and `none` for rules no script can catch. A check that already fails at HEAD is listed with the commit that broke it.
-A check that could touch production (a test suite that reads `DATABASE_URL`, say) must say how to run it safely.
+**Length.** Keep the fixed sections short. The rules can use the space they need, at one or two lines each, under
+subheadings. A few hundred lines of rules is acceptable. History and status do not go in this file. Codex reads a
+maximum of 32 KiB of instruction files by default (`project_doc_max_bytes`), which is approximately 400 lines.
 
-The file grows one way: **when something breaks without anyone noticing, add a rule, and a check if one can be
-written.** A rule enforced by a script is worth more than a paragraph explaining it, and a script is the part an
-agent can't misread.
+**Evidence.** In tests on three repos, agents found 85% of the known traps with the file and 72% without it. Without
+the file, they also used about 25% more tool calls and 20% more tokens.
 
-### 2. Commits: the why, where the next agent will look
+**Keep all rules in the root file.** Do not put rules in nested `AGENTS.md` files. Most important rules involve
+more than one directory, and tools load nested files only in some conditions. Claude Code loads a nested file when
+the agent opens a file in that directory with its Read tool, and never when a root `CLAUDE.md` exists. Codex loads
+only the files between the repo root and the directory where it starts. In tests, recall of rules in nested files
+fell from 98% to 76% when the agent read files through the shell. If the file becomes too long, move reference
+material out. Do not move rules out.
 
-Agents already read history. In testing, fresh agents given a real repo and a task ran `git log -- <path>`,
-searched with `-S`, and opened the commit that did the same thing last time, without being asked. So the history is the project's memory,
-and its quality depends on how the commits were written. Since agents look there unprompted, the instruction file
-only needs to say when history matters, not to read it before every change.
+**Add rules from failures.** When something breaks and nobody sees it, add a rule. Add a check if you can write one.
+A script is better than a paragraph, because an agent cannot misread a script.
 
-- **The subject is the index.** Name what changed and, if there was one, the trap, in the words a later search
-  would use. In testing, one commit fixed a collision between two branches that had each bumped the protocol
-  version, under a subject that named only the two features; every agent that needed the lesson searched straight
-  past it. "Protocol version: two branches both bumped to 7; take a number past both on merge" would have been
-  found.
-- **Commit small.** One change per commit, each passing its checks. A small commit gets a subject that can name its
-  trap exactly, it shows up cleanly in `git log -- <path>`, and it can be reverted or bisected alone. A day of work
-  in one commit leaves the next agent a diff to reverse-engineer.
-- **The body carries the why**, unless the diff makes it obvious: what was wrong, what you did, what you ruled out
-  and why, what you ran (numbers, not "tests pass"), and what you didn't test.
-- **Leave every fixed bug's reproduction behind** as a test, a script or a fixture, and say in the body how to run
-  it.
+## 2. Commits: the reason for each change
 
-A good one:
+Agents already read the history. In tests, new agents ran `git log -- <path>` and `git log -S`, and opened the last
+commit that did the same task. Nobody told them to do this. Thus the history is the memory of the project, and the
+commit messages set its quality.
+
+- **The subject is the index.** Name what changed, and the trap if there was one. Use the words that a later search
+  will use. Example: one commit fixed a conflict between two branches that both increased the protocol version.
+  Its subject named only the two features, and no agent that searched for the problem found it. "Protocol version:
+  two branches both bumped to 7; take a number past both on merge" is easy to find.
+- **Commit small.** Make one change in each commit, and make each commit pass its checks. A small commit can name
+  its trap exactly, and it is easy to find, revert and bisect.
+- **The body gives the reason.** Write what was wrong, what you did, and what you rejected and why. Then write what
+  you ran (with numbers) and what you did not test. If the diff makes the reason clear, you can omit the body.
+- **Keep the reproduction of each fixed bug** as a test, a script or a fixture. In the body, write how to run it.
+
+Example:
 
 ```
 Sessions: renew the token before the clock-skew window, not at expiry (random logouts)
@@ -95,63 +96,55 @@ servers 0-60 s fast: 0 rejections in 1,000 (was 37). Not tested: renewals during
 a deploy, while both signing keys are live.
 ```
 
-No trailers or structured fields are required. Agents read prose well, and a trailer nothing ever queries is
-formatting. If you want provenance, `Assisted-by: <agent>:<model>` is the emerging convention.
+Trailers are not necessary, because agents read prose well. For provenance, `Assisted-by: <agent>:<model>` is
+becoming the standard.
 
-### 3. `docs/<topic>/`: only past the threshold
+## 3. `docs/<topic>/`: only for hard changes
 
-Write a design doc when a change is **hard to reverse** (a schema, a protocol, auth, money), **spans more than one
-session**, or **needs measured targets**. Anything else is recorded by its commits.
+Write a design doc only when a change:
 
-A design doc is named by topic and kept current as the work goes on, unlike a phase spec, which is archived once
-done. The pattern that works:
+- is hard to reverse (a schema, a protocol, auth, money),
+- continues for more than one session, or
+- needs measured targets.
+
+For all other changes, the commits are the record.
+
+Name the folder by topic, and keep it current while the work continues. A design doc has four parts:
 
 - **Today:** how it works now, with file references and a measured baseline.
-- **Design:** the target, and the rules every step must keep.
-- **Passes:** the work in steps, each with acceptance numbers and the command that measures them.
-- **Status:** a table at the top of the folder's index. This is the only "state" dotplan asks you to keep, and it's
-  scoped to one topic.
+- **Design:** the target, and the rules that each step must obey.
+- **Passes:** the steps, each with acceptance numbers and the command that measures them.
+- **Status:** a table at the top of the folder's index. This is the only status that dotplan keeps, and it is for
+  one topic.
 
-Have hard-to-reverse work reviewed by a fresh session that didn't write it. A different model family helps when
-it's at least as capable as the author: in [one controlled study](https://arxiv.org/abs/2607.21656), review between
-two frontier models helped in one direction and hurt in the other, so capability matters more than lineage.
+Get a review of hard-to-reverse work from a new session that did not write it. A different model family can help
+if it is at least as capable as the author. In [one controlled study](https://arxiv.org/abs/2607.21656), review
+between two frontier models helped in one direction and made the result worse in the other.
 
 ## The loop
 
-1. **Orient:** the README, `AGENTS.md`, `git status`, `git log -n 20`. Go further back (`git log -- <paths>`,
-   `-S`, `blame`) when the change repeats, reverses or depends on something done before.
-2. **Decide the size:** most work goes straight to code. If it's hard to reverse, long, or needs measuring, start or
-   update a `docs/<topic>/`.
-3. **Work, then run the checks** for the paths you touched, at least the ones the table lists.
-4. **Integrate:** after any merge, rebase or conflict resolution, run those checks again.
-5. **Commit** with a subject someone could search for and a body that says why.
-6. **Promote:** if something broke that nobody noticed, add the rule and its check to `AGENTS.md` in the same commit
-   as the fix.
+1. **Orient:** read the README and `AGENTS.md`, then run `git status` and `git log -n 20`. Look further back
+   (`git log -- <paths>`, `-S`, `blame`) when the change repeats, reverses or depends on earlier work.
+2. **Size the work:** most work goes directly to code. If the change is hard to reverse, long, or needs
+   measurement, start or update `docs/<topic>/`.
+3. **Work, then run the checks** for each path you changed.
+4. **Integrate:** after a merge, rebase or conflict resolution, run the checks again.
+5. **Commit** with a subject that a search can find and a body that gives the reason.
+6. **Promote:** if something broke and nobody saw it, add a rule and its check to `AGENTS.md` in the same commit as
+   the fix.
+
+## Open work
+
+Git shows what is done and what changed. Git cannot show what is next, what is on hold, or what waits for a person.
+Put those items in your issue tracker. If you do not have a tracker, keep a `TODO.md` at the root with open items
+only, one line each. Delete each line when its item is done. If `TODO.md` needs a cleanup pass, it has become a
+state file again.
 
 ## No opinion on
 
-Merge, rebase or squash. Branches or committing straight to main. Issue trackers, roadmaps, task lists. Commit
-trailers. Which models. dotplan works the same whichever you choose. One caveat: if you squash-merge, the squashed
-commit is the only history left, so its message has to carry the reasoning of the whole branch.
-
-## What changed from v1
-
-v1 existed because agents were stateless and couldn't be trusted to reconstruct where a project stood. It kept a
-precomputed summary in `.planning/STATE.md` and `ROADMAP.md`. Models can now rebuild that picture from git in
-seconds, more accurately than a summary written at the end of the last session. The summaries became caches of git
-with an invalidation problem. They bloated, needed their own compaction passes (one project's STATE went from 425
-lines to 116, its ROADMAP from 498 to 110), and were a tax on every session.
-
-| v1 | v2 |
-|---|---|
-| `.planning/STATE.md` | Derived: `git status`, `git log`, the open branches |
-| `.planning/ROADMAP.md` | Your issue tracker, or a `TODO.md` of open items |
-| `phases/NN-name/SPEC.md` for low-reversibility work | `docs/<topic>/`, named by topic and kept current (old specs stay, frozen) |
-| The SPEC's postmortem | The commit bodies |
-| `_deferred/` | The tracker or `TODO.md` |
-| Agent instructions snippet | `AGENTS.md`: map, rules, checks by path |
-| Reversibility decides whether to spec | Unchanged |
-| Review with a different model | A fresh session; a different family when it's as capable |
+Merge, rebase or squash. Branches or direct commits to main. Issue trackers. Commit trailers. Which models.
+One caveat: if you squash-merge, the squashed commit is the only history that remains. Its message must give the
+reasons for the full branch.
 
 ## Setup
 
@@ -159,75 +152,50 @@ lines to 116, its ROADMAP from 498 to 110), and were a tax on every session.
 curl -fsSL https://raw.githubusercontent.com/jamesondh/dotplan/main/init.sh | bash
 ```
 
-This creates `AGENTS.md` from the [template](templates/AGENTS.md) if there isn't one, and a `CLAUDE.md` stub that
-imports it. Then fill in the map, the rules you already know, and the checks you already run. Or copy the template
-by hand; that's all the script does.
+The script creates `AGENTS.md` from the [template](templates/AGENTS.md) if it does not exist, and a `CLAUDE.md`
+that imports it. Then write the map, the rules you know, and the checks you run. You can also copy the template
+manually. The script does nothing more.
 
-## Migrating from v1
+## From v1
 
-The migration decides whether v2 helps. In testing on three v1 repos, agents found about 90% of the traps written
-in the instruction file and noticeably fewer of those left in `STATE.md` or phase specs. Where the migration moved
-buried rules into `AGENTS.md`, recall went up (74% → 84%). Where it trimmed rules to keep the file short, it went
-down (88% → 81%). So **cut history and status, never rules.**
-
-1. **Promote every rule.** Go through `STATE.md`, the phase specs and their postmortems, and the old instruction
-   file. Anything a future change could break goes into `AGENTS.md` under Rules, with its reason and a check. This
-   includes rules that only apply to one subsystem: group them under subheadings. Leave out what happened and when.
-   Verify every path, command and number against the code as you go; old instruction files are often stale.
-2. **Mine what never made it into the repo.** If you have agent session logs or notes, search them for corrections
-   ("no, that's wrong", "you forgot", reverts). Each of the three test repos had 8 to 11 real traps recorded nowhere
-   in the repo. Those are rules too.
-3. **Move in-progress design work** on a hard-to-reverse subsystem into `docs/<topic>/`. Reference material that isn't
-   a rule (setup, tool usage, build variants) goes in the README; create one if there isn't one.
-4. **Freeze the finished phase specs where they are.** Code comments usually cite them by path, and in older repos
-   they often hold the only record of why, because the commits have empty bodies. Leave `.planning/phases/` in place,
-   add a one-line `.planning/README.md` saying it's a frozen archive, and don't add to it.
-5. **Delete `STATE.md`, `ROADMAP.md`, `_deferred/` and `.planning/templates/`.** Open work goes where intent lives
-   (next section). Fix anything that points at the deleted files, including scripts in other repos.
-6. **Replace the instruction file** with `AGENTS.md` and a `CLAUDE.md` of `@AGENTS.md`. Remove any `AGENT.md`
-   (singular): some harnesses load it alongside `AGENTS.md`.
-
-The migration itself is one commit; it's the exception to "commit small." Anything that reads `.planning/`
-automatically (a sync script, a dashboard) needs pointing elsewhere first.
-
-### Where open work goes
-
-State that git can derive (what's done, what changed, where things stand) doesn't get a file. Intent can't be
-derived: what's next, what's parked, what's waiting on a person. Put it in your issue tracker. With no tracker, keep a
-`TODO.md` at the root: open items only, one line each, deleted when done. If it ever needs a compaction pass, it has
-turned back into `STATE.md`.
+Cut history and status, but do not cut rules. Move each rule from `STATE.md`, the phase specs and the old
+instruction file into `AGENTS.md`, and verify it against the code. In tests, migrations that moved rules into
+`AGENTS.md` increased recall (74% → 84%). Migrations that removed rules to make the file shorter decreased it
+(88% → 81%). Move in-progress design work into `docs/<topic>/`. Keep finished phase specs in `.planning/phases/` as a
+frozen archive, because code comments often refer to them. Then delete `STATE.md`, `ROADMAP.md`, `_deferred/` and
+`.planning/templates/`. [SKILL.md](SKILL.md#migrating-from-v1-planning) has all the steps.
 
 ## Measuring it
 
-There are no benchmarks for this, but a cheap test tells you most of what you need. Freeze a snapshot of the repo.
-Write five or six requests of the kind you'd really make, and for each, a key of the traps a careful engineer who
-knew the project would raise, noting where each lives (instruction file, README, docs, code, history). Ask fresh
-agents, one request each, what they'd watch out for and what they'd run, without writing code. Grade the answers
-against the key, and compare instruction files over the same snapshot.
+To test an instruction file, freeze a snapshot of the repo. Write five or six requests of the type you really make.
+For each request, write a key: the traps that a careful engineer who knows the project would mention, and where
+each trap is written (instruction file, README, docs, code or history). Give each request to a new agent. Ask it
+what it would look out for and what it would run, but not to write code. Grade the answers against the key, and
+compare instruction files on the same snapshot.
 
-Recall by layer matters more than the total. Traps written in the instruction file should be close to 100%, so the
-interesting numbers are for the README, the code and the history. A useful ablation is the same snapshot with the
-commit bodies stripped: whatever recall falls is what the commit messages were carrying.
+Look at recall for each layer, not only the total. Recall of traps in the instruction file should be almost 100%,
+so the useful numbers are for the README, the code and the history. To measure what the commit messages carry,
+remove the commit bodies from the snapshot. The decrease in recall is what the bodies carried.
 
 ## Related work
 
-- [Lore](https://arxiv.org/abs/2603.15566) (2026) turns commit messages into decision records with nine git
-  trailers (`Constraint`, `Rejected`, `Directive`, `Not-tested`...) and a query CLI. dotplan agrees that commits
-  are the place for this, and asks for prose rather than a schema.
-- [`Assisted-by:`](https://allthingsopen.org/articles/open-source-ai-contributions-assisted-by-git-trailer-standard),
-  used by the Linux kernel, Fedora, LLVM and QEMU, records which agent and model helped. It covers provenance, a
-  separate question from memory.
-- [Entire](https://entire.io) saves each agent session's transcript alongside its commits, and
-  [git-ai](https://github.com/git-ai-project/git-ai) and Cursor's
-  [Agent Trace](https://github.com/cursor/agent-trace) attribute code to the conversations that wrote it. They keep
-  everything; dotplan keeps what the next agent needs.
+- [Lore](https://arxiv.org/abs/2603.15566) (2026) turns commit messages into decision records with git trailers
+  (`Constraint`, `Rejected`, `Directive`, `Not-tested`...) and a query CLI. dotplan agrees that commits are the
+  correct place for this, but asks for prose, not a schema.
+- [`Assisted-by:`](https://allthingsopen.org/articles/open-source-ai-contributions-assisted-by-git-trailer-standard)
+  records which agent and model helped with a commit. The Linux kernel, Fedora and LLVM recommend it. It is about
+  provenance, which is a different problem from memory.
+- [Entire](https://entire.io) keeps the transcript of each agent session with its commits.
+  [git-ai](https://github.com/git-ai-project/git-ai) and Cursor's [Agent Trace](https://github.com/cursor/agent-trace)
+  connect code to the conversations that wrote it. These tools keep everything. dotplan keeps what the next agent
+  needs.
 
 ## Principles
 
-- **Checks over prose.** A rule an agent can run is a rule it can't misread.
-- **Derive state; don't cache it.** Anything git can tell you shouldn't also live in a file.
-- **The code and the running system outrank every file.** Instruction files and docs are claims; when they disagree
-  with what's there, fix them in the same commit.
-- **Put knowledge where it's looked for:** always-true rules in the instruction file, the why of a change in its
-  commit, the design of a hard subsystem next to it in `docs/`.
+- **Checks over prose.** An agent cannot misread a rule that it can run.
+- **Derive state; do not cache it.** If git can tell you something, do not also keep it in a file.
+- **The code and the running system are the truth.** Instruction files and docs are claims. When they disagree with
+  the code, fix them in the same commit.
+- **Put knowledge where agents look for it:** rules that are always true in `AGENTS.md`, the reason for a change in
+  its commit, and the design of a hard subsystem in `docs/`.
 - **Match the process to the reversibility.** Most changes need a good commit and nothing more.

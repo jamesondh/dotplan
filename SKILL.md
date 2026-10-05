@@ -29,8 +29,8 @@ There is no STATE.md or ROADMAP.md. State comes from git; open work lives in the
 
 ## While working
 
-- Run the checks in `AGENTS.md` for every path you touched; they're the minimum. After a merge, rebase or conflict resolution, run them
-  again.
+- Run the checks in `AGENTS.md` for every path you touched; they're the minimum. After a merge, rebase or
+  conflict resolution, run them again.
 - Keep every fixed bug's reproduction as a test, script or fixture.
 - Hard-to-reverse work: have a fresh session review it, from a different model family when one at least as capable
   is available.
@@ -56,15 +56,24 @@ a script under `tools/` or `scripts/`) if one can be written. Add the check to t
 ## Setting up a repo
 
 Copy `templates/AGENTS.md` to the repo root (or run `init.sh`), write `CLAUDE.md` as `@AGENTS.md`, then fill in
-the map, the rules already known, and the checks already run. Keep the fixed part short; the rules take the room they need, in the root file: nested `AGENTS.md` files load
-only in some harnesses and modes, so don't scope rules into them.
+the map, the rules already known, and the checks already run. Keep the fixed part short; the rules take the room
+they need. Keep every rule in the root file: nested `AGENTS.md` files load only in some harnesses and modes.
 
 ## Migrating from v1 (`.planning/`)
 
-Cut history and status, never rules. Promote every rule from `STATE.md`, phase specs and the old instruction file
-into `AGENTS.md` (grouped by subsystem, a line or two each, verified against the code); mine session logs or notes
-for corrections that never reached the repo; move in-progress hard-to-reverse design into `docs/<topic>/` and
-reference material into the README; leave finished phase specs in `.planning/phases/` as a frozen archive (code cites
-them); delete `STATE.md`, `ROADMAP.md`, `_deferred/` and `.planning/templates/`; put open work in the tracker or a
-root `TODO.md` of open items only; replace `AGENT.md`/the old snippet with `AGENTS.md` plus `CLAUDE.md` = `@AGENTS.md`.
-One commit. Check first that nothing (including other repos) reads `.planning/` automatically.
+Cut history and status, never rules. Do it in one commit, after checking that nothing (including scripts in other
+repos) reads `.planning/` automatically.
+
+1. Promote every rule from `STATE.md`, the phase specs and their postmortems, and the old instruction file into
+   `AGENTS.md`: a line or two each, grouped by subsystem, with its reason and a check. Verify every path, command
+   and number against the code; old instruction files are often stale.
+2. Mine session logs or notes for corrections that never reached the repo ("no, that's wrong", "you forgot",
+   reverts). Those are rules too.
+3. Move in-progress design work on hard-to-reverse subsystems into `docs/<topic>/`. Move reference material that
+   isn't a rule (setup, tool usage, build variants) into the README.
+4. Leave finished phase specs in `.planning/phases/` as a frozen archive (code comments cite them), with a one-line
+   `.planning/README.md` that says so.
+5. Delete `STATE.md`, `ROADMAP.md`, `_deferred/` and `.planning/templates/`, and fix anything that points at them.
+   Open work goes in the tracker or a root `TODO.md` of open items only.
+6. Replace the old instruction file with `AGENTS.md` plus a `CLAUDE.md` of `@AGENTS.md`. Remove any `AGENT.md`
+   (singular): some harnesses load it alongside `AGENTS.md`.

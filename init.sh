@@ -32,5 +32,5 @@ else
 fi
 
 if [ -d .planning ]; then
-  echo "dotplan: found a v1 .planning/ directory. See \"Migrating from v1\" in the README."
+  echo "dotplan: found a v1 .planning/ directory. See \"From v1\" in the README."
 fi
