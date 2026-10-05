@@ -13,19 +13,55 @@ parts:
 
 There is nothing to install and no planning directory to maintain.
 
+This is what works for me as of October 2026, mostly with Opus 5.5. It will change, as v1 did. Test it on your own
+repos ([how](#test-it-on-your-own-repos)), and keep what makes your agents better.
+
 ## Why so little
 
-dotplan v1 (early 2026) was a `.planning/` directory with a roadmap, a state file, and a spec for each phase of
-work. The agents of that time often lost track of a project between sessions, and the files gave them a summary to
-start from.
+dotplan v1 (early 2026) had three goals:
 
-Current agents do not need that summary. They read `git log` and the code, and they find the state of a project in
-seconds. Their result is often more accurate than a summary from the end of the last session. The v1 files also
-became longer with time and needed regular cleanup. With Opus 5.5, the v1 process made the work slower, not faster.
+- Let an agent continue from where the last session stopped.
+- Make past decisions and designs easy to audit.
+- Improve the process with a postmortem after each phase of work.
 
-An agent that starts a new session still needs three things: where the code is, what breaks without a visible
-error, and why the code is the way it is. `AGENTS.md` gives the first two. The git history gives the third. v2 asks
-you to write those two well, and nothing more. v1 is on the [`v1` branch](https://github.com/jamesondh/dotplan/tree/v1).
+It used a `.planning/` directory with a roadmap, a state file, and a spec for each phase. v2 keeps the goals and
+removes the directory:
+
+- **Continuity:** current agents rebuild the state of a project from git and the code in seconds.
+- **Audit:** each commit message gives the reason for its change. Large designs go in `docs/<topic>/`.
+- **Improvement:** when something breaks and nobody sees it, the lesson becomes a rule in `AGENTS.md`, which agents
+  read every session. In v1, lessons stayed in postmortems and state files, and agents found them less often. This
+  is narrower than a postmortem. To improve the process itself, I run evals ([below](#test-it-on-your-own-repos)).
+
+The v1 files also became longer with time and needed regular cleanup. With Opus 5.5, they made my work slower, not
+faster. v1 is on the [`v1` branch](https://github.com/jamesondh/dotplan/tree/v1).
+
+## What I measured
+
+I tested v2 on three of my own repos: a data platform, a trading service and a game, in TypeScript, C and Python.
+Each had one to five months of work and 200 to 1,300 commits. For each repo, I wrote realistic requests and a key of
+the traps that a careful engineer would mention. New agents planned each request without writing code, and blind
+graders scored the plans against the keys.
+
+These results are for Opus 5.5 in Claude Code, in bypass-permissions mode. The numbers are means per answer:
+
+| Instruction file | Answers | Traps found | Tool calls | Input tokens |
+|---|---|---|---|---|
+| None | 24 | 72% | 8.2 | 347k |
+| v2 `AGENTS.md` | 36 | 85% | 6.4 | 288k |
+
+With the file, agents found 13 percentage points more traps, and they used 22% fewer tool calls and 17% fewer
+tokens. On traps that the file describes, recall rose from 59% to 86%. With the same file, Codex (gpt-6-sol) found
+68%. I did not test Codex without a file.
+
+An earlier test, with Opus 5.5 subagents, compared v1 and v2 on the same three repos. **v2 found as many traps as
+v1** (83% each, on average), with no state files to keep current. This was true only when the migration kept every
+rule. Where the migration moved rules from old files into `AGENTS.md`, recall rose from 74% to 84%. Where it removed
+rules to make the file shorter, recall fell from 88% to 81%.
+
+The limits: three repos, one author, and keys that I wrote. The tests measure one thing: whether an agent finds the
+known traps when it plans a change. They do not measure whether the code is correct, and they do not show that this
+template is better than another one.
 
 ## 1. `AGENTS.md`: map, rules, checks
 
@@ -52,22 +88,25 @@ example, a test suite that reads `DATABASE_URL`), write how to run it safely.
 subheadings. A few hundred lines of rules is acceptable. History and status do not go in this file. Codex reads a
 maximum of 32 KiB of instruction files by default (`project_doc_max_bytes`), which is approximately 400 lines.
 
-**Evidence.** In tests on three repos, agents found 85% of the known traps with the file and 72% without it. Without
-the file, they also used about 25% more tool calls and 20% more tokens.
-
-**Keep all rules in the root file.** Do not put rules in nested `AGENTS.md` files. Most important rules involve
-more than one directory, and tools load nested files only in some conditions. Claude Code loads a nested file when
-the agent opens a file in that directory with its Read tool, and never when a root `CLAUDE.md` exists. Codex loads
-only the files between the repo root and the directory where it starts. In tests, recall of rules in nested files
-fell from 98% to 76% when the agent read files through the shell. If the file becomes too long, move reference
-material out. Do not move rules out.
-
 **Add rules from failures.** When something breaks and nobody sees it, add a rule. Add a check if you can write one.
 A script is better than a paragraph, because an agent cannot misread a script.
 
+### Nested `AGENTS.md` files
+
+As of October 2026, I keep all rules in the root file, for two reasons:
+
+- **Few rules belong to one directory.** In my three repos, only 7 of 79 rules applied to one directory.
+- **Tools load nested files only in some conditions.** Claude Code loads a nested file when the agent opens a file
+  in that directory with its Read tool. In bypass-permissions mode, the agent reads files with `cat`, so Claude Code
+  did not load a nested file in any of 72 runs. On one repo, recall of the moved rules fell from 98% to 76% in
+  bypass mode. In default mode, it did not fall (93% to 95%).
+
+If your setup loads nested files reliably, they can work. Test it in your own setup. If the root file becomes too
+long, move reference material out first.
+
 ## 2. Commits: the reason for each change
 
-Agents already read the history. In tests, new agents ran `git log -- <path>` and `git log -S`, and opened the last
+Agents already read the history. In my tests, new agents ran `git log -- <path>` and `git log -S`, and opened the last
 commit that did the same task. Nobody told them to do this. Thus the history is the memory of the project, and the
 commit messages set its quality.
 
@@ -96,8 +135,7 @@ servers 0-60 s fast: 0 rejections in 1,000 (was 37). Not tested: renewals during
 a deploy, while both signing keys are live.
 ```
 
-Trailers are not necessary, because agents read prose well. For provenance, `Assisted-by: <agent>:<model>` is
-becoming the standard.
+Trailers are not necessary, because agents read prose well.
 
 ## 3. `docs/<topic>/`: only for hard changes
 
@@ -133,12 +171,20 @@ between two frontier models helped in one direction and made the result worse in
 6. **Promote:** if something broke and nobody saw it, add a rule and its check to `AGENTS.md` in the same commit as
    the fix.
 
-## Open work
+## Test it on your own repos
 
-Git shows what is done and what changed. Git cannot show what is next, what is on hold, or what waits for a person.
-Put those items in your issue tracker. If you do not have a tracker, keep a `TODO.md` at the root with open items
-only, one line each. Delete each line when its item is done. If `TODO.md` needs a cleanup pass, it has become a
-state file again.
+What works for my repos and models may not work for yours. A small test tells you most of what you need:
+
+1. Freeze a snapshot of the repo.
+2. Write five or six requests of the type you really make.
+3. For each request, write a key: the traps that a careful engineer who knows the project would mention, and where
+   each trap is written (instruction file, README, docs, code or history).
+4. Give each request to a new agent. Ask it what it would look out for and what it would run, but not to write code.
+5. Grade the answers against the key. Compare instruction files on the same snapshot, including no file at all.
+
+Look at recall for each layer, not only the total. Recall of traps in the instruction file should be almost 100%,
+so the useful numbers are for the README, the code and the history. To measure what the commit messages carry,
+remove the commit bodies from the snapshot. The decrease in recall is what the bodies carried.
 
 ## No opinion on
 
@@ -158,33 +204,17 @@ manually. The script does nothing more.
 
 ## From v1
 
-Cut history and status, but do not cut rules. Move each rule from `STATE.md`, the phase specs and the old
-instruction file into `AGENTS.md`, and verify it against the code. In tests, migrations that moved rules into
-`AGENTS.md` increased recall (74% → 84%). Migrations that removed rules to make the file shorter decreased it
-(88% → 81%). Move in-progress design work into `docs/<topic>/`. Keep finished phase specs in `.planning/phases/` as a
-frozen archive, because code comments often refer to them. Then delete `STATE.md`, `ROADMAP.md`, `_deferred/` and
-`.planning/templates/`. [SKILL.md](SKILL.md#migrating-from-v1-planning) has all the steps.
-
-## Measuring it
-
-To test an instruction file, freeze a snapshot of the repo. Write five or six requests of the type you really make.
-For each request, write a key: the traps that a careful engineer who knows the project would mention, and where
-each trap is written (instruction file, README, docs, code or history). Give each request to a new agent. Ask it
-what it would look out for and what it would run, but not to write code. Grade the answers against the key, and
-compare instruction files on the same snapshot.
-
-Look at recall for each layer, not only the total. Recall of traps in the instruction file should be almost 100%,
-so the useful numbers are for the README, the code and the history. To measure what the commit messages carry,
-remove the commit bodies from the snapshot. The decrease in recall is what the bodies carried.
+Cut history and status, but do not cut rules ([why](#what-i-measured)). Move each rule from `STATE.md`, the phase
+specs and the old instruction file into `AGENTS.md`, and verify it against the code. Move in-progress design work
+into `docs/<topic>/`. Keep finished phase specs in `.planning/phases/` as a frozen archive, because code comments
+often refer to them. Then delete `STATE.md`, `ROADMAP.md`, `_deferred/` and `.planning/templates/`.
+[SKILL.md](SKILL.md#migrating-from-v1-planning) has all the steps.
 
 ## Related work
 
 - [Lore](https://arxiv.org/abs/2603.15566) (2026) turns commit messages into decision records with git trailers
   (`Constraint`, `Rejected`, `Directive`, `Not-tested`...) and a query CLI. dotplan agrees that commits are the
   correct place for this, but asks for prose, not a schema.
-- [`Assisted-by:`](https://allthingsopen.org/articles/open-source-ai-contributions-assisted-by-git-trailer-standard)
-  records which agent and model helped with a commit. The Linux kernel, Fedora and LLVM recommend it. It is about
-  provenance, which is a different problem from memory.
 - [Entire](https://entire.io) keeps the transcript of each agent session with its commits.
   [git-ai](https://github.com/git-ai-project/git-ai) and Cursor's [Agent Trace](https://github.com/cursor/agent-trace)
   connect code to the conversations that wrote it. These tools keep everything. dotplan keeps what the next agent
@@ -193,9 +223,11 @@ remove the commit bodies from the snapshot. The decrease in recall is what the b
 ## Principles
 
 - **Checks over prose.** An agent cannot misread a rule that it can run.
-- **Derive state; do not cache it.** If git can tell you something, do not also keep it in a file.
+- **Derive state; do not cache it.** A file that repeats what git or the code says goes out of date, and agents
+  trust it anyway. Keep intent (what is next, what is on hold) wherever you like.
 - **The code and the running system are the truth.** Instruction files and docs are claims. When they disagree with
   the code, fix them in the same commit.
 - **Put knowledge where agents look for it:** rules that are always true in `AGENTS.md`, the reason for a change in
   its commit, and the design of a hard subsystem in `docs/`.
 - **Match the process to the reversibility.** Most changes need a good commit and nothing more.
+- **Measure, then change.** Remove ceremony that does not make your agents better, and add what does.

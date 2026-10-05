@@ -14,7 +14,7 @@ Project memory without a planning directory. Three places, each where the next a
 3. **`docs/<topic>/`**: only for work that's hard to reverse, spans sessions, or needs measured targets. Today,
    design (with the rules every step keeps), passes with acceptance numbers, and a status table.
 
-There is no STATE.md or ROADMAP.md. State comes from git; open work lives in the tracker or a root `TODO.md`.
+There is no STATE.md or ROADMAP.md. State comes from git; open work lives wherever the project keeps it.
 
 ## Before non-trivial work
 
@@ -45,8 +45,7 @@ There is no STATE.md or ROADMAP.md. State comes from git; open work lives in the
 Ran: <commands, with numbers>. Not tested: <what, and why it matters>.
 ```
 
-Skip the body only when the diff explains itself. No trailers are required; `Assisted-by: <agent>:<model>` is
-fine for provenance.
+Skip the body only when the diff explains itself. No trailers are required.
 
 ## When something broke that nobody noticed
 
@@ -57,7 +56,8 @@ a script under `tools/` or `scripts/`) if one can be written. Add the check to t
 
 Copy `templates/AGENTS.md` to the repo root (or run `init.sh`), write `CLAUDE.md` as `@AGENTS.md`, then fill in
 the map, the rules already known, and the checks already run. Keep the fixed part short; the rules take the room
-they need. Keep every rule in the root file: nested `AGENTS.md` files load only in some harnesses and modes.
+they need. Prefer the root file for rules: as of October 2026, nested `AGENTS.md` files load only in some harnesses
+and modes (Claude Code in bypass-permissions mode never loaded them in testing).
 
 ## Migrating from v1 (`.planning/`)
 
@@ -74,6 +74,6 @@ repos) reads `.planning/` automatically.
 4. Leave finished phase specs in `.planning/phases/` as a frozen archive (code comments cite them), with a one-line
    `.planning/README.md` that says so.
 5. Delete `STATE.md`, `ROADMAP.md`, `_deferred/` and `.planning/templates/`, and fix anything that points at them.
-   Open work goes in the tracker or a root `TODO.md` of open items only.
+   Open work goes wherever the project keeps it.
 6. Replace the old instruction file with `AGENTS.md` plus a `CLAUDE.md` of `@AGENTS.md`. Remove any `AGENT.md`
    (singular): some harnesses load it alongside `AGENTS.md`.
