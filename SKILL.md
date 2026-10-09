@@ -28,9 +28,8 @@ build more.
    `git log --grep=<word>`, `git blame`. Open (`git show`) the commit that did the same thing last time; it's the
    template, and its body lists what it had to change together.
 4. Skip the archaeology for typos, mechanical renames and new, self-contained files.
-5. If a step is hard to reverse or long, read or start `docs/<topic>/` first. Judge each step, not the project:
-   copying history into a new repo is reversible even when the project moves money. A subtopic is a section of
-   the doc, not a new doc.
+5. If a step is hard to reverse or long, read or start `docs/<topic>/` first. Judge each step on its own, not by
+   the riskiest part of the project. A subtopic is a section of the doc, not a new doc.
 
 ## While working
 

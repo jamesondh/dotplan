@@ -16,10 +16,10 @@
   out, what you ran (with numbers) and what you didn't test.
 - Leave each fixed bug's reproduction behind as a test or a script.
 - A step that's hard to reverse (schema, auth, money, external API) or several sessions long: design it in
-  `docs/<topic>/` first. Judge each step, not the project: copying history into a new repo is reversible even when
-  the project moves money. Measure with the checks below or existing tools before writing new ones. Have a fresh
-  session review the work (the design first, when that could save rework), from a different model family when one
-  at least as capable is available, and ask it what to cut or do more simply, not only what's missing.
+  `docs/<topic>/` first. Judge each step on its own, not by the riskiest part of the project. Measure with the
+  checks below or existing tools before writing new ones. Have a fresh session review the work (the design first,
+  when that could save rework), from a different model family when one at least as capable is available, and ask
+  it what to cut or do more simply, not only what's missing.
 - If the work grows well past what you first expected, stop and tell the user: what you expected, where it is now,
   and a smaller way to finish.
 - Code and the running system outrank this file and every doc. When they disagree, fix the file in the same
