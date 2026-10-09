@@ -11,10 +11,13 @@ Project memory without a planning directory. Three places, each where the next a
    reason and a check), and a table of which checks to run for which paths. `CLAUDE.md` is a stub: `@AGENTS.md`.
 2. **Commit messages**: the subject names what changed and the trap, in searchable words; the body says what was
    wrong, what was done and ruled out, what was run (with numbers) and what wasn't tested.
-3. **`docs/<topic>/`**: only for work that's hard to reverse, spans sessions, or needs measured targets. Today,
-   design (with the rules every step keeps), passes with acceptance numbers, and a status table.
+3. **`docs/<topic>/`**: only for steps that are hard to reverse or span sessions. Today, design (with the rules
+   every step keeps), passes with how you'll know each worked, and a status table.
 
 There is no STATE.md or ROADMAP.md. State comes from git; open work lives wherever the project keeps it.
+
+Do what was asked, the simplest way that meets it. Every rule below is a minimum or a trigger, not a reason to
+build more.
 
 ## Before non-trivial work
 
@@ -25,15 +28,23 @@ There is no STATE.md or ROADMAP.md. State comes from git; open work lives wherev
    `git log --grep=<word>`, `git blame`. Open (`git show`) the commit that did the same thing last time; it's the
    template, and its body lists what it had to change together.
 4. Skip the archaeology for typos, mechanical renames and new, self-contained files.
-5. If the change is hard to reverse, long, or needs measuring, read or start `docs/<topic>/` first.
+5. If a step is hard to reverse or long, read or start `docs/<topic>/` first. Judge each step, not the project:
+   copying history into a new repo is reversible even when the project moves money. A subtopic is a section of
+   the doc, not a new doc.
 
 ## While working
 
 - Run the checks in `AGENTS.md` for every path you touched; they're the minimum. After a merge, rebase or
   conflict resolution, run them again.
 - Keep every fixed bug's reproduction as a test, script or fixture.
-- Hard-to-reverse work: have a fresh session review it, from a different model family when one at least as capable
-  is available.
+- Measure with the project's checks or existing tools before writing new ones.
+- Hard-to-reverse work: have a fresh session review it (the design first, when that could save rework), from a
+  different model family when one at least as capable is available. Ask what to cut or do more simply, and whether the approach fits the request, not only what's
+  missing. A finding can be declined when its fix costs more than the risk.
+- Experiments, new tooling and paid runs nobody asked for are proposals: say what they cost and what decision
+  their result would change, and wait.
+- If the work grows well past what you first expected, stop and tell the user: what you expected, where it is now,
+  and a smaller way to finish.
 
 ## Committing
 
@@ -49,8 +60,10 @@ Skip the body only when the diff explains itself. No trailers are required.
 
 ## When something broke that nobody noticed
 
-In the same commit as the fix: add the rule to `AGENTS.md` under Rules, with its reason, and add a check (a test or
-a script under `tools/` or `scripts/`) if one can be written. Add the check to the table for the paths it covers.
+In the same commit as the fix: add the rule to `AGENTS.md` under Rules, with its reason, and add a check (a test
+or a script under `tools/` or `scripts/`) if one can be written. Add the check to the table for the paths it
+covers. This is for the project's code: tooling built for one task doesn't get rules. Delete rules whose code is
+gone.
 
 ## Setting up a repo
 

@@ -9,7 +9,7 @@ parts:
 
 1. **`AGENTS.md`**: a map of the repo, the rules that are easy to break, and the checks that find the breaks.
 2. **Commit messages** that record why each change was made.
-3. **Design docs** in `docs/<topic>/`, only for changes that are hard to reverse, long, or need measured targets.
+3. **Design docs** in `docs/<topic>/`, only for steps that are hard to reverse or long.
 
 There is nothing to install and no planning directory to maintain.
 
@@ -60,8 +60,8 @@ rule. Where the migration moved rules from old files into `AGENTS.md`, recall ro
 rules to make the file shorter, recall fell from 88% to 81%.
 
 The limits: three repos, one author, and keys that I wrote. The tests measure one thing: whether an agent finds the
-known traps when it plans a change. They do not measure whether the code is correct, and they do not show that this
-template is better than another one.
+known traps when it plans a change. They do not measure whether the code is correct, or whether the agent builds
+more than the change needs, and they do not show that this template is better than another one.
 
 ## 1. `AGENTS.md`: map, rules, checks
 
@@ -71,7 +71,7 @@ SDK harnesses, add a `CLAUDE.md` that contains only `@AGENTS.md`.
 
 The file has four sections ([template](templates/AGENTS.md)):
 
-- **Working here:** six rules for how to work. They are the same in every repo.
+- **Working here:** eight rules for how to work. They are the same in every repo.
 - **Map:** where the important code is, one line for each item, 20 to 40 lines in total. Include each
   `docs/<topic>/` folder. Explanation goes in the README.
 - **Rules:** things that a change can break without a visible error. Give each rule its reason and a check. The most
@@ -139,32 +139,43 @@ Trailers are not necessary, because agents read prose well.
 
 ## 3. `docs/<topic>/`: only for hard changes
 
-Write a design doc only when a change:
+Write a design doc only when a step:
 
-- is hard to reverse (a schema, a protocol, auth, money),
-- continues for more than one session, or
-- needs measured targets.
+- is hard to reverse (a schema, a protocol, auth, money), or
+- continues for more than one session.
 
-For all other changes, the commits are the record.
+Judge each step, not the project. Copying history into a new repo is reversible, even when the project moves
+money. For all other changes, the commits are the record.
 
 Name the folder by topic, and keep it current while the work continues. A design doc has four parts:
 
-- **Today:** how it works now, with file references and a measured baseline.
+- **Today:** how it works now, with file references, and a measured baseline if the work changes a number.
 - **Design:** the target, and the rules that each step must obey.
-- **Passes:** the steps, each with acceptance numbers and the command that measures them.
+- **Passes:** the steps, each with how you will know it worked. Use the project's checks or existing tools before
+  you write new ones.
 - **Status:** a table at the top of the folder's index. This is the only status that dotplan keeps, and it is for
   one topic.
 
 Get a review of hard-to-reverse work from a new session that did not write it. A different model family can help
 if it is at least as capable as the author. In [one controlled study](https://arxiv.org/abs/2607.21656), review
-between two frontier models helped in one direction and made the result worse in the other.
+between two frontier models helped in one direction and made the result worse in the other. Ask the reviewer what
+to cut, and whether the approach fits the request, not only what is missing. The author can decline a finding when
+its fix costs more than the risk.
+
+**Why this matters.** Each of these rules adds work, and an agent that follows them literally can stack them. In one
+repo migration, a project that touched money made every step "hard to reverse". Each design doc needed measured
+targets, so the agent wrote tooling to measure them. The tooling then needed its own docs and reviews, and every
+review finding was fixed by adding more. The result was about 13,000 lines for what was mostly a history import.
+So the template now starts with "do what was asked, the simplest way that meets it". Side work is a proposal that
+says what it costs and what decision it would change. And the agent stops and tells the user when the work grows
+well past what it expected.
 
 ## The loop
 
 1. **Orient:** read the README and `AGENTS.md`, then run `git status` and `git log -n 20`. Look further back
    (`git log -- <paths>`, `-S`, `blame`) when the change repeats, reverses or depends on earlier work.
-2. **Size the work:** most work goes directly to code. If the change is hard to reverse, long, or needs
-   measurement, start or update `docs/<topic>/`.
+2. **Size the work:** most work goes directly to code. If a step is hard to reverse or long, start or update
+   `docs/<topic>/`. If the work grows well past what you expected, stop and tell the user.
 3. **Work, then run the checks** for each path you changed.
 4. **Integrate:** after a merge, rebase or conflict resolution, run the checks again.
 5. **Commit** with a subject that a search can find and a body that gives the reason.
@@ -229,5 +240,6 @@ often refer to them. Then delete `STATE.md`, `ROADMAP.md`, `_deferred/` and `.pl
   the code, fix them in the same commit.
 - **Put knowledge where agents look for it:** rules that are always true in `AGENTS.md`, the reason for a change in
   its commit, and the design of a hard subsystem in `docs/`.
-- **Match the process to the reversibility.** Most changes need a good commit and nothing more.
+- **Match the process to the reversibility.** Most changes need a good commit and nothing more. Every rule is a
+  minimum or a trigger, not a reason to build more.
 - **Measure, then change.** Remove ceremony that does not make your agents better, and add what does.
