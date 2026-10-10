@@ -71,7 +71,7 @@ SDK harnesses, add a `CLAUDE.md` that contains only `@AGENTS.md`.
 
 The file has four sections ([template](templates/AGENTS.md)):
 
-- **Working here:** eight rules for how to work. They are the same in every repo.
+- **Working here:** seven rules for how to work. They are the same in every repo.
 - **Map:** where the important code is, one line for each item, 20 to 40 lines in total. Include each
   `docs/<topic>/` folder. Explanation goes in the README.
 - **Rules:** things that a change can break without a visible error. Give each rule its reason and a check. The most

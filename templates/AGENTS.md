@@ -5,7 +5,8 @@
 ## Working here
 
 - Do what was asked, the simplest way that meets it. Experiments, new tooling and paid runs nobody asked for are
-  proposals: say what they cost and what decision their result would change, and wait.
+  proposals: say what they cost and what decision their result would change, and wait. If the work grows well past
+  what you first expected, stop and tell the user: what you expected, where it is now, and a smaller way to finish.
 - When you're repeating something the project has done before, reversing an earlier decision, or changing code
   whose purpose isn't clear, look at its history (`git log -- <path>`, `git log -S<symbol>`, `git blame`) and
   open the commits that explain it.
@@ -20,8 +21,6 @@
   checks below or existing tools before writing new ones. Have a fresh session review the work (the design first,
   when that could save rework), from a different model family when one at least as capable is available, and ask
   it what to cut or do more simply, not only what's missing.
-- If the work grows well past what you first expected, stop and tell the user: what you expected, where it is now,
-  and a smaller way to finish.
 - Code and the running system outrank this file and every doc. When they disagree, fix the file in the same
   commit. When the project's code breaks unnoticed, add a rule here, with a check if one can be written; tooling
   built for one task doesn't get rules. Delete rules whose code is gone.
