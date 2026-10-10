@@ -53,7 +53,7 @@
     <rect x="86" y="296" width="4" height="34" rx="2" fill="#58A6FF" opacity="0.95"/>
 
     <text x="104" y="243" font-size="18" fill="#D8E1FF"><tspan fill="#58A6FF">##</tspan> Working here</text>
-    <text x="314" y="243" font-size="16" fill="#9AA7C7">six rules, every repo</text>
+    <text x="314" y="243" font-size="16" fill="#9AA7C7">seven rules, every repo</text>
 
     <text x="104" y="281" font-size="18" fill="#D8E1FF"><tspan fill="#58A6FF">##</tspan> Map</text>
     <text x="314" y="281" font-size="16" fill="#9AA7C7">where things are</text>
